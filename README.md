@@ -26,3 +26,31 @@ This project is divided into several technical and analytical objectives:
 * Create complex visualizations to represent the relationships between the concepts:
     * Construction of a **concept graph** shared among the companies.
     * Visualization of a **semantic network** of sub-themes addressed in the CSR discourses.
+
+## Getting Started
+
+To begin working on the project, please follow the steps below to set up the development environment.
+
+### Prerequisites
+
+Ensure that the following tools are installed on your system:
+
+* **Python**
+* **pip** (Python Package Manager)
+* **git** (To clone the repository)
+
+### Step 1: Clone the Repository
+
+Open your terminal or command prompt and clone the repository:
+
+```bash
+git clone https://github.com/Yusuf-Bulut-1907/CSR-Benchmark.git
+cd CSR-Benchmark
+
+### Step 2: Install Python Libraries
+
+Install all necessary project libraries listed in the `requirements.txt` file:
+
+```bash
+pip install -r requirements.txt
+
