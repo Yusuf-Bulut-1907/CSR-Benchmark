@@ -21,7 +21,6 @@ for res in NLTK_RESOURCES:
 # -----------------------------
 # CONFIG
 # -----------------------------
-INPUT_DIR = "scraped_output"
 INPUT_DIR = "data/rse_pages"
 OUTPUT_FILE = "clean_corpus.json"
 MIN_TEXT_LENGTH = 300

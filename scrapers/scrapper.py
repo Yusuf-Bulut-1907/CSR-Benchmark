@@ -42,7 +42,6 @@ print("--- Strating the scraper ---")
 # Configuration
 # ----------------------
 HEADERS = {
-    "User-Agent": "Matteo-WebMiningBot/1.0 (+mailto:your-email@example.com)"
     "User-Agent" :  "Your usuer agent string here"
 }
 #not used but kept for reference
