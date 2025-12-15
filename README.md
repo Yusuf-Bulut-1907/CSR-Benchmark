@@ -46,6 +46,7 @@ Open your terminal or command prompt and clone the repository:
 ```bash
 git clone https://github.com/Yusuf-Bulut-1907/CSR-Benchmark.git
 cd CSR-Benchmark
+```
 
 ### Step 2: Install Python Libraries
 
@@ -53,4 +54,4 @@ Install all necessary project libraries listed in the `requirements.txt` file:
 
 ```bash
 pip install -r requirements.txt
-
+```
