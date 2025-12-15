@@ -1,0 +1,6 @@
+### This file lists the dependencies for the project ###
+
+requests
+beautifulsoup4
+tqdm
+pandas
