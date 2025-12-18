@@ -6,7 +6,7 @@ import json
 # PATH TO THE JSON FOLDER
 #==========================
 
-JSON_FOLDER_PATH = r"C:\Users\yusuf\OneDrive\Documents\Projet RSE\scraped_output" # Please specify the path to the folder containing JSON files
+JSON_FOLDER_PATH = r"c:\Users\basti\OneDrive - UCL\Master 1\WEB MINING\Projet\scraped_output" # Please specify the path to the folder containing JSON files
 
 #==========================
 # LOADING OF THE CORPUS
