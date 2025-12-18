@@ -6,6 +6,17 @@ The objective of this project is to analyze and compare the CSR (Corporate Socia
 
 Acting as consultants, our mission is to collect, analyze, and compare the CSR commitments published on the websites of large companies from various sectors. This strategic benchmark aims to identify **dominant trends and themes**, extract key **insights**, and analyze the relationships between the data in order to provide informed strategic recommendations.
 
+## Table of Contents
+
+- [Project Plan](#project-plan)
+-- [1. Data Collection (Scraping)](#1-data-collection-scraping)
+-- [2. Textual Analysis (Text Mining)](#2-textual-analysis-text-mining)
+-- [3. Network Analysis (Web Mining)](#3-network-analysis-web-mining)
+- [Getting started](#getting-started)
+- [Scraping](#scraping)
+- [Text Mining](#text-mining)
+- [Link Analysis](#link-analysis)
+
 ## Project Plan
 
 This project is divided into several technical and analytical objectives:
@@ -55,3 +66,10 @@ Install all necessary project libraries listed in the `requirements.txt` file:
 ```bash
 pip install -r requirements.txt
 ```
+## Scraping
+
+## Text Mining
+
+In this part, we are going to ...
+
+## Link Analysis
