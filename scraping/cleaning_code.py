@@ -21,7 +21,7 @@ for res in NLTK_RESOURCES:
 # -----------------------------
 # CONFIG
 # -----------------------------
-INPUT_DIR = "scraped_output"
+INPUT_DIR = "data/rse_pages"
 OUTPUT_FILE = "clean_corpus.json"
 MIN_TEXT_LENGTH = 300
 LANGUAGE = "english"
@@ -46,8 +46,11 @@ def remove_urls_and_emails(text: str) -> str:
     text = re.sub(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", " ", text)
     return text
 
-def remove_non_alpha(text: str) -> str:
-    return re.sub(r"[^A-Za-z\s]", " ", text)
+def remove_non_alphanumeric(text: str) -> str:
+    return re.sub(r"[^A-Za-z0-9\s]", " ", text)
+#def remove_non_alpha(text: str) -> str:
+#return re.sub(r"[^A-Za-z\s]", " ", text)
+#remove non-alphanumeric but keep numbers to change in github
 
 def normalize_spaces(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
@@ -62,7 +65,7 @@ def clean_text_pipeline(text: str) -> str:
     text = remove_encoding_artifacts(text)
     text = remove_lists_and_breaks(text)
     text = remove_urls_and_emails(text)
-    text = remove_non_alpha(text)
+    text = remove_non_alphanumeric(text)
     text = normalize_spaces(text)
     text = tokenize_and_filter(text)
     return text

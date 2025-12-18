@@ -42,8 +42,52 @@ print("--- Strating the scraper ---")
 # Configuration
 # ----------------------
 HEADERS = {
-    "User-Agent": "Matteo-WebMiningBot/1.0 (+mailto:your-email@example.com)"
+    "User-Agent" :  "Your usuer agent string here"
 }
+#strict kyewords 
+KEYWORDS = [#strict_keywords
+    "esg",
+    "csr",
+    "esg report",
+    "sustainability report",
+    "impact report",
+    "non-financial report",
+    "integrated report",
+    "corporate social responsibility",
+    "net zero",
+    "carbon footprint",
+    "scope 1",
+    "scope 2",
+    "scope 3"
+    # Environment
+    "sustainability",
+    "sustainable",
+    "environmental",
+    "climate",
+    "emissions",
+    "renewable",
+    "biodiversity",
+    "recycling",
+    "waste management",
+    "energy efficiency",
+    "circular economy",
+    "water management",
+    "deforestation",
+
+    # Social
+    "human rights",
+    "supply chain",
+    "diversity",
+    "inclusion",
+    "health and safety",
+    "decent work",
+
+    # Governance
+    "governance",
+    "transparency",
+    "anticorruption",
+    "compliance",
+    "stakeholder"]
 #not used but kept for reference
 REVISED_KEYWORDS = [
     # Mots-clés généraux / Rapports
@@ -63,7 +107,7 @@ REVISED_KEYWORDS = [
     "governance", "governance policy", "transparency", "anticorruption", "compliance", "stakeholder"
 ]
 # improved english-only keywords (compact) used in the scraper
-KEYWORDS = [
+SOFT_KEYWORDS = [
     "esg", "csr", "sustainability", "sustainable", "responsibility", "corporate responsibility",
     "environment", "environmental", "social", "governance", "impact", "ethics", "ethical",
     "climate", "carbon", "carbon footprint", "net zero", "emissions",
@@ -240,7 +284,7 @@ if __name__ == "__main__":
     companies = {}
 
     # change max_depth here if needed (recommended 1 or 2)
-    MAX_DEPTH = 2
+    MAX_DEPTH = 1
 
     for company, url in companies.items():
         try:
