@@ -15,7 +15,7 @@ Acting as consultants, our mission is to collect, analyze, and compare the CSR c
 - [**Getting started**](#getting-started)
 - [**Scraping**](#scraping)
 - [**Text Mining**](#text-mining)
-- [Link Analysis](#link-analysis)
+- [**Link Analysis**](#link-analysis)
 
 ## Project Plan
 
