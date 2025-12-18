@@ -8,13 +8,13 @@ Acting as consultants, our mission is to collect, analyze, and compare the CSR c
 
 ## Table of Contents
 
-- [Project Plan](#project-plan)
--- [1. Data Collection (Scraping)](#1-data-collection-scraping)
--- [2. Textual Analysis (Text Mining)](#2-textual-analysis-text-mining)
--- [3. Network Analysis (Web Mining)](#3-network-analysis-web-mining)
-- [Getting started](#getting-started)
-- [Scraping](#scraping)
-- [Text Mining](#text-mining)
+- [**Project Plan**](#project-plan)
+ - [1. Data Collection (Scraping)](#1-data-collection-scraping)
+ - [2. Textual Analysis (Text Mining)](#2-textual-analysis-text-mining)
+ - [3. Network Analysis (Web Mining)](#3-network-analysis-web-mining)
+- [**Getting started**](#getting-started)
+- [**Scraping**](#scraping)
+- [**Text Mining**](#text-mining)
 - [Link Analysis](#link-analysis)
 
 ## Project Plan
