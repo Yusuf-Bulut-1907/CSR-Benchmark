@@ -57,8 +57,35 @@ def preprocess_doc(doc):
     return tokens
 texts_clean = df["text"].apply(clean_text).tolist()
 
-docs = nlp.pipe(texts_clean, batch_size=50)
+docs = nlp.pipe(texts_clean, batch_size=100)
 
-df["tokens"] = [preprocess_doc(doc) for doc in docs]
+tokens_list = []
+
+for i, doc in enumerate(docs):
+    if i % 500 == 0:
+        print(f"Processed {i} documents")
+
+    tokens_list.append(preprocess_doc(doc))
+
+df["tokens"] = tokens_list
 
 print(df["tokens"].head())
+
+#=====================
+#### TF-IDF ###
+#=====================
+
+df["tokens"]
+
+df["text_processed"] = df["tokens"].apply(lambda x: " ".join(x)) #des chaines de caractères, pas des listes pour td-idf
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+tfidf_vectorizer = TfidfVectorizer(
+    min_df=5,       # élimine les mots trop rares (réduit le bruit)
+    max_df=0.8,     # élimine les mots trop fréquents
+    ngram_range=(1, 2)  # mots seuls + bigrammes (climate change for instance)
+)
+X_tfidf = tfidf_vectorizer.fit_transform(df["text_processed"])
+
+print("TF-IDF matrix shape:", X_tfidf.shape)
