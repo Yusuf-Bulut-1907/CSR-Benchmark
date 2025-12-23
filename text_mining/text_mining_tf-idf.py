@@ -17,7 +17,8 @@ custom_stopwords = {
     "download", "consent", "cookie", "use", "data", "also", "may", "one", 
     "new", "us", "cookies", "cooky", "privacy", "device", "browser",
     "collect", "processing", "purpose", "request", "contact", "law", 
-    "advertising", "third", "party", "personal", "identify", "storage"
+    "advertising", "third", "party", "personal", "identify", "storage", 
+    "que", "und", "para", "die", "siemens", "les", "des", "von", "com", "der"
 }
 custom_stopwords = set(nltk.corpus.stopwords.words("english")).union(custom_stopwords)
 # =====================
