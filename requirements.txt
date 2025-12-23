@@ -6,4 +6,5 @@ tqdm
 pandas
 bs4
 nltk
-sklearn
+scikit-learn
+
