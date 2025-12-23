@@ -5,12 +5,12 @@ from sklearn.metrics import silhouette_samples
 import numpy as np
 
 def plot_heatmap(df, row_col, cluster_col, title, filename=None):
-    # Calcul des effectifs par cluster pour enrichir la légende
+    # calculate counts for each cluster
     counts = df[cluster_col].value_counts().sort_index()
     
     heatmap_data = pd.crosstab(df[row_col], df[cluster_col], normalize='index')
     
-    # Renommer les colonnes pour afficher le "N" (nombre d'entreprises)
+    # Rename columns to show "N" (number of companies)
     heatmap_data.columns = [f"C{i} (n={counts[i]})" for i in counts.index]
 
     plt.figure(figsize=(12, 10))
