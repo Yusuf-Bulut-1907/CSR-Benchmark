@@ -34,6 +34,7 @@ import logging
 import sys
 from tqdm import tqdm
 import os
+from companies_to_scrape import companies_to_scrape
 
 
 print("--- Strating the scraper ---") 
@@ -41,14 +42,15 @@ print("--- Strating the scraper ---")
 # ----------------------
 # Configuration
 # ----------------------
+
 HEADERS = {
-    "User-Agent" :  "Your usuer agent string here"
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept-Language': 'en-US,en;q=0.9',
 }
-#strict kyewords 
-KEYWORDS = [#strict_keywords
-    "esg",
-    "csr",
-    "esg report",
+
+KEYWORDS = [ 
+    #strict_keywords
+    "esg", "csr","esg report",
     "sustainability report",
     "impact report",
     "non-financial report",
@@ -87,35 +89,36 @@ KEYWORDS = [#strict_keywords
     "transparency",
     "anticorruption",
     "compliance",
-    "stakeholder"]
-#not used but kept for reference
-REVISED_KEYWORDS = [
-    # Mots-clés généraux / Rapports
-    "esg", "csr", "sustainability", "sustainable", "responsibility", "corporate responsibility",
-    "impact", "ethics", "ethical", "esg report", "sustainability report", "impact report",
-
-    # Pilier Environnement (E)
-    "environment", "environmental", "climate", "carbon", "carbon footprint", "net zero", 
-    "emissions", "renewable", "biodiversity", "recycling", "waste management", "energy efficiency",
-    "circular economy", "water management", "deforestation",
-
-    # Pilier Social (S)
-    "social", "human rights", "supply chain", "diversity", "inclusion", "health and safety", 
-    "community", "decent work",
-
-    # Pilier Gouvernance (G)
-    "governance", "governance policy", "transparency", "anticorruption", "compliance", "stakeholder"
+    "stakeholder"
 ]
-# improved english-only keywords (compact) used in the scraper
-SOFT_KEYWORDS = [
-    "esg", "csr", "sustainability", "sustainable", "responsibility", "corporate responsibility",
-    "environment", "environmental", "social", "governance", "impact", "ethics", "ethical",
-    "climate", "carbon", "carbon footprint", "net zero", "emissions",
-    "renewable", "biodiversity", "recycling", "waste management", "energy efficiency",
-    "governance policy", "transparency", "esg report", "sustainability report","impact report" 
-    ]
-# normalize keywords lowercased
+
+KEYWORDS_URL = [
+    # --- Piliers Généraux ---
+    "sustainability", "sustainable", "csr", "esg", "responsibility", 
+    "impact", "corporate-responsibility", "social-responsibility",
+    
+    # --- Rapports et Données (Crucial pour ton analyse) ---
+    "report", "disclosure", "data", "metrics", "index", "performance",
+    "gri", "sasb", "tcfd", "non-financial", "integrated-report",
+    
+    # --- Environnement & Climat ---
+    "climate", "carbon", "emissions", "net-zero", "environmental", 
+    "planet", "energy", "nature", "biodiversity", "water", "waste", 
+    "circular-economy", "green",
+    
+    # --- Social & Humain ---
+    "social", "human-rights", "diversity", "inclusion", "equity", 
+    "employees", "people", "community", "labor", "supply-chain",
+    
+    # --- Gouvernance & Éthique ---
+    "governance", "ethics", "compliance", "policy", "integrity", 
+    "transparency", "stakeholder"
+]
+EXCLUDE_URLS = ["facebook", "twitter", "linkedin", "instagram", "youtube", "login", "register"]
+
 KEYWORDS = [k.lower() for k in KEYWORDS]
+KEYWORDS_URL = [k.lower() for k in KEYWORDS_URL]
+EXCLUDE_URLS = [u.lower() for u in EXCLUDE_URLS]
 
 # polite settings
 REQUEST_TIMEOUT = 12
@@ -136,7 +139,15 @@ def same_domain(base_url, new_url):
 
 def is_relevant_url(url):
     u = url.lower()
-    return any(k in u for k in KEYWORDS)
+
+    if any(x in u for x in EXCLUDE_URLS):
+        return False 
+    
+    for k in KEYWORDS_URL:
+        if k in u or k.replace('-', '_') in u:
+            return True 
+            
+    return False 
 
 
 def contains_keyword_text(text):
@@ -158,18 +169,37 @@ def safe_get(session, url):
     return None
 
 
-# parse page to structured dict
+
 def extract_page(soup, url, company):
-    title = (soup.title.string.strip() if soup.title and soup.title.string else "").strip()
-    subtitles = [h.get_text(strip=True) for h in soup.find_all(["h1", "h2", "h3"]) if h.get_text(strip=True)]
-    paragraphs = [p.get_text(strip=True) for p in soup.find_all("p") if p.get_text(strip=True)]
-    text = "\n".join(paragraphs)
-    # get internal links
+
+    # 1. Links (avant nettoyage)
     links = []
     for a in soup.find_all("a", href=True):
-        href = a.get("href")
-        full = urljoin(url, href)
+        full = urljoin(url, a.get("href"))
         links.append(full)
+
+    # 2. Remove noise
+    for noise in soup(["script", "style", "nav", "footer", "header", "aside"]):
+        noise.decompose()
+
+    # 3. Metadata
+    title = soup.title.string.strip() if soup.title and soup.title.string else ""
+    subtitles = [
+        h.get_text(strip=True)
+        for h in soup.find_all(["h1","h2","h3","h4"])
+        if h.get_text(strip=True)
+    ]
+
+    # 4. Main content
+    main = soup.find("main") or soup.find("article")
+    if main:
+        text = main.get_text(separator=" ", strip=True)
+    else:
+        text = " ".join(
+            p.get_text(strip=True)
+            for p in soup.find_all("p")
+        )
+
     return {
         "company": company,
         "url": url,
@@ -259,7 +289,7 @@ def scrape_company(company, start_url, max_depth=1, check_text_for_keywords=True
                 continue
             # add link if either url looks relevant or depth < max_depth
             # we use url-relevance to reduce queue size
-            if is_relevant_url(link) or depth < max_depth:
+            if is_relevant_url(link) and depth < max_depth:
                 to_visit.append((link, depth + 1))
 
     pbar.close()
@@ -280,15 +310,14 @@ def scrape_company(company, start_url, max_depth=1, check_text_for_keywords=True
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-#name the companies to scrape here "company_name": "start_url",
-    companies = {}
 
+    
     # change max_depth here if needed (recommended 1 or 2)
     MAX_DEPTH = 1
 
-    for company, url in companies.items():
+    for company, url in companies_to_scrape.items():
         try:
-            scrape_company(company, url, max_depth=MAX_DEPTH, check_text_for_keywords=True, out_dir="scraped_output")
+            scrape_company(company, url, max_depth=MAX_DEPTH, check_text_for_keywords=True, out_dir="Scraped_output")
         except KeyboardInterrupt:
             print("Interrupted by user")
             sys.exit(0)
