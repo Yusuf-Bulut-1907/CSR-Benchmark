@@ -209,6 +209,55 @@ if __name__ == "__main__":
         for company in removed_companies:
             print(f"- {company}")
 
+    # Download txt file with all the prindted statistics
+    with open("corpus_statistics.txt", "w", encoding="utf-8") as f:
+        f.write(f"Number of documents: {num_documents_initial}\n")
+        f.write(f"Average document length: {avg_doc_length_initial} words\n")
+        f.write(
+            f"Maximum document length: {max_doc_length_initial} "
+            f"({max_doc_title_initial})\n"
+        )
+        f.write(
+            f"Minimum document length: {min_doc_length_initial} "
+            f"({min_doc_title_initial})\n"
+        )
+        f.write(f"Vocabulary size: {vocab_size_initial} unique words\n")
+
+        f.write(f"\nNumber of documents after removing short documents: {num_documents_after_short}\n")
+        f.write(f"Vocabulary size: {vocab_size_after_short} unique words\n")
+
+        f.write(f"\nNumber of documents after removing unwanted phrases: {num_documents_after_unwanted}\n")
+        f.write(f"Vocabulary size: {vocab_size_after_unwanted} unique words\n")
+
+        f.write(f"\nNumber of documents after removing duplicates: {num_documents_after_duplicates}\n")
+        f.write(f"Vocabulary size: {vocab_size_after_duplicates} unique words\n")
+
+        if non_english_docs:
+            f.write("\nNon-English documents detected (first 10):\n")
+            for i, lang, title in non_english_docs[:10]:
+                f.write(f"- Document index: {i}, Detected language: {lang}, Title: {title}\n")
+
+        f.write(f"\nTotal number of non-English documents: {num_non_english_docs}\n")
+
+        f.write(f"\nNumber of documents after removing non-English documents: {num_documents_final}\n")
+        f.write(f"Vocabulary size: {vocab_size_final} unique words\n")
+
+        f.write("\nFinal corpus statistics:\n")
+        f.write(f"Total number of documents: {num_documents_final}\n")
+        f.write(f"Average document length: {avg_doc_length_final} words\n")
+        f.write(f"Maximum document length: {max_doc_length_final}\n")
+        f.write(f"Minimum document length: {min_doc_length_final}\n")
+        f.write(f"Vocabulary size: {vocab_size_final} unique words\n")
+
+        f.write("\nNumber of documents per company:\n")
+        for number, (company, count) in enumerate(sorted_companies, start=1):
+            f.write(f"{number:>3}) {company:<40} {count:>5} documents\n")
+        if removed_companies:
+            f.write("\nCompanies removed due to cleaning:\n")
+            for company in removed_companies:
+                f.write(f"- {company}\n")
+    print("\n✅ Corpus statistics saved to 'corpus_statistics.txt'")
+
 
 
 
