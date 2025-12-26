@@ -11,9 +11,15 @@ from load_corpus import load_corpus
 
 nltk.download("stopwords")
 nltk.download("punkt")
-custom_stopwords = {"company", "business", "report", "year", "page", "website",
-    "provide", "include", "information", "service", "client", "group,", "pdf", "site",
-    "download"}
+custom_stopwords = {
+    "company", "business", "report", "year", "page", "website", "provide", 
+    "include", "information", "service", "client", "group", "pdf", "site", 
+    "download", "consent", "cookie", "use", "data", "also", "may", "one", 
+    "new", "us", "cookies", "cooky", "privacy", "device", "browser",
+    "collect", "processing", "purpose", "request", "contact", "law", 
+    "advertising", "third", "party", "personal", "identify", "storage", 
+    "que", "und", "para", "die", "siemens", "les", "des", "von", "com", "der"
+}
 custom_stopwords = set(nltk.corpus.stopwords.words("english")).union(custom_stopwords)
 # =====================
 # LOAD CORPUS
