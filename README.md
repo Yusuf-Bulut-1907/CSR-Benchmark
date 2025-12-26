@@ -9,9 +9,6 @@ Acting as consultants, our mission is to collect, analyze, and compare the CSR c
 ## Table of Contents
 
 - [**Project Plan**](#project-plan)
- - [1. Data Collection (Scraping)](#1-data-collection-scraping)
- - [2. Textual Analysis (Text Mining)](#2-textual-analysis-text-mining)
- - [3. Network Analysis (Web Mining)](#3-network-analysis-web-mining)
 - [**Getting started**](#getting-started)
 - [**Scraping**](#scraping)
 - [**Text Mining**](#text-mining)
@@ -105,7 +102,29 @@ For each company, the scraper produces a JSON file in the `Scraped_output/` fold
 
 ## Text Mining
 
-In this part,
+Now that we have obtained the raw text data from the company websites through the scraping process, the goal of this step is to transform it into a clean and structured corpus suitable for textual analysis. This stage also generates descriptive statistics to help understand the quality, distribution, and coverage of the collected data.
+
+The script [`load_corpus.py`](./text_mining/load_corpus.py) is responsible for loading the scraped JSON files from the `Scraped_output/` folder. It performs the following tasks:
+
+1. Reads all JSON files produced by the scraper.  
+2. Extracts the main textual content from each page while removing boilerplate elements (navigation menus, ads, etc.) using the `justext` library.  
+3. Collects metadata for each document, including:
+   - `company`: the company name  
+   - `url`: the original page URL  
+   - `title`: the page title 
+
+```bash
+python text_mining/load_corpus.py
+```
+By default, you need to specify the path to the JSON folder in the `JSON_FOLDER_PATH` variable.
+
+Once the corpus is loaded, `stats_and_cleaning.py` processes the documents to create a clean and structured dataset suitable for analysis. The script performs several key steps, including removing very short or irrelevant documents, eliminating duplicates, and filtering out non-English content. After cleaning, it generates descriptive statistics about the corpus, such as the total number of documents, vocabulary size, and distribution of documents across companies.
+
+Run the following command:
+```bash
+python text_mining/stats_and_cleaning.py
+```
+Running this script will generate `corpus_statistics.txt` in the root folder.
 
 ## Link Analysis
 
