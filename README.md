@@ -82,13 +82,13 @@ python scraping/scrapper.py
 ```
 The scraper will navigate each company's website listed in companies_to_scrape.py, following links within the same domain that match relevant keywords. It respects a polite delay between requests and retries failed connections.
 
-For each company, the scraper produces a JSON file in the Scraped_output/ folder. Each file contains:
-company: company name
-url: URL of the page
-title: page title
-subtitles: all headings (h1–h4)
-text: main text content
-links: list of extracted links
+For each company, the scraper produces a JSON file in the `Scraped_output/` folder. Each file contains:<br>
+`company`: company name<br>
+`url`: URL of the page<br>
+`title`: page title<br>
+`subtitles`: all headings (h1–h4)<br>
+`text`: main text content<br>
+`links`: list of extracted links
 
 ## Text Mining
 
