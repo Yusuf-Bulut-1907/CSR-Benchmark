@@ -46,9 +46,9 @@ To begin working on the project, please follow the steps below to set up the dev
 
 Ensure that the following tools are installed on your system:
 
-* **Python**
-* **pip** (Python Package Manager)
-* **git** (To clone the repository)
+* **Python 3.9 or higher** ([download](https://www.python.org/downloads/))
+* **pip** (Python Package Manager) ([installation guide](https://pip.pypa.io/en/stable/installation/))
+* **git** (To clone the repository) ([download](https://git-scm.com/install/))
 
 ### Step 1: Clone the Repository
 
@@ -68,8 +68,35 @@ pip install -r requirements.txt
 ```
 ## Scraping
 
+The objective of this step is to automatically collect the CSR-related pages from the websites of selected companies. This allows us to build a structured corpus of textual data for further analysis.
+
+The list of companies and their corresponding URLs is stored in the Python dictionary [`companies_to_scrape.py`](./scraping/companies_to_scrape.py). Companies were chosen to represent a variety of sectors and to ensure that relevant CSR content is available on their official websites.
+
+To reproduce the data collection:
+
+1. Ensure that all dependencies from `requirements.txt` are installed.
+2. Run the scraper script:
+
+```bash
+python scraping/scrapper.py
+```
+The scraper will navigate each company's website listed in companies_to_scrape.py, following links within the same domain that match relevant keywords. It respects a polite delay between requests and retries failed connections.
+
+For each company, the scraper produces a JSON file in the Scraped_output/ folder. Each file contains:
+company: company name
+url: URL of the page
+title: page title
+subtitles: all headings (h1–h4)
+text: main text content
+links: list of extracted links
+
 ## Text Mining
 
-In this part, we are going to ...
+In this part,
 
 ## Link Analysis
+
+## Authors
+- **Bastian Minet** – [Bastian-Mnt](https://github.com/Bastian-Mnt)
+- **Matteo Galizia** – [Matteo-glz](https://github.com/Matteo-glz)
+- **Yusuf Bulut** – [Yusuf-Bulut-1907](https://github.com/Yusuf-Bulut-1907)
