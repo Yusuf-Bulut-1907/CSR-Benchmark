@@ -72,6 +72,19 @@ The objective of this step is to automatically collect the CSR-related pages fro
 
 The list of companies and their corresponding URLs is stored in the Python dictionary [`companies_to_scrape.py`](./scraping/companies_to_scrape.py). Companies were chosen to represent a variety of sectors and to ensure that relevant CSR content is available on their official websites.
 
+Before running the full scraper, a [`smoke test`](./scraping/scrap_smoke_testing.py) can be performed to verify that each company's URL is accessible and likely to return meaningful content.
+Run:
+
+```bash
+python scraping/scrap_smoke_testing.py
+```
+This script will generate a `smoke_test_results.txt` file in the root of the repository containing three sections:<br>
+`SUCCESS`: URLs that responded correctly and can be scraped<br>
+`BLOCKED`: URLs that returned access errors (e.g., 401 or 403)<br>
+`ERRORS`: URLs that could not be reached for other reasons
+
+Performing this test helps identify sites that might need manual adjustment or that cannot be scraped.
+
 To reproduce the data collection:
 
 1. Ensure that all dependencies from `requirements.txt` are installed.
