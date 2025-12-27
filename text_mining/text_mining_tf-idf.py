@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from scipy.sparse import hstack
 
-from load_corpus import load_corpus
+from stats_and_cleaning import get_cleaned_corpus
 
 nltk.download("stopwords")
 nltk.download("punkt")
@@ -18,13 +18,17 @@ custom_stopwords = {
     "new", "us", "cookies", "cooky", "privacy", "device", "browser",
     "collect", "processing", "purpose", "request", "contact", "law", 
     "advertising", "third", "party", "personal", "identify", "storage", 
-    "que", "und", "para", "die", "siemens", "les", "des", "von", "com", "der"
+    "que", "und", "para", "die", "siemens", "les", "des", "von", "com", "der",
+    "gdpr", "privacy", "visit","read", "learn", "access", "store", "session","legal","datum",
+    "opt","applicable","necessary","interest","notice","email","performance","functionality",
+    "personal_datum","privacy_policy", "adresse", "linkedin","facebook","instagram","twitter","setting", "settings"
+
 }
 custom_stopwords = set(nltk.corpus.stopwords.words("english")).union(custom_stopwords)
 # =====================
 # LOAD CORPUS
 # =====================
-documents, metadata = load_corpus()
+documents, metadata = get_cleaned_corpus()
 
 df = pd.DataFrame({
     "text": documents,
@@ -38,7 +42,51 @@ print(f"🏢 Unique companies : {df['company'].nunique()}")
 # CLEANING + LEMMATIZATION (SPACY)
 # =====================
 nlp = spacy.load("en_core_web_md", disable=["ner", "parser"])
+def extract_noun_trigrams(doc):
+    """
+    Extract NOUN-NOUN-NOUN or PROPN-NOUN-NOUN trigrams from a spaCy Doc.
+    Returns a list of lemmatized trigrams joined with '_'.
+    """
+    trigrams = []
 
+    for i in range(len(doc) - 2):
+        t1, t2, t3 = doc[i], doc[i+1], doc[i+2]
+
+        if (
+            t1.pos_ in {"NOUN", "PROPN"} and
+            t2.pos_ in {"NOUN", "PROPN"} and
+            t3.pos_ in {"NOUN", "PROPN"}
+        ):
+            if not (t1.is_stop or t2.is_stop or t3.is_stop):
+                trigram = f"{t1.lemma_}_{t2.lemma_}_{t3.lemma_}"
+                trigrams.append(trigram)
+
+    return trigrams
+def extract_filtered_bigrams(doc):
+    """
+    Extract linguistically meaningful bigrams:
+    - ADJ + NOUN
+    - NOUN + NOUN
+    - PROPN + NOUN
+    """
+    bigrams = []
+
+    for i in range(len(doc) - 1):
+        t1, t2 = doc[i], doc[i+1]
+
+        if (
+            not t1.is_stop and not t2.is_stop and
+            t1.is_alpha and t2.is_alpha and
+            (
+                (t1.pos_ == "ADJ" and t2.pos_ == "NOUN") or
+                (t1.pos_ == "NOUN" and t2.pos_ == "NOUN") or
+                (t1.pos_ == "PROPN" and t2.pos_ == "NOUN")
+            )
+        ):
+            bigram = f"{t1.lemma_}_{t2.lemma_}"
+            bigrams.append(bigram)
+
+    return bigrams
 def clean_and_lemmatize(text):
     # nettoyage physique
     text = text.lower()
@@ -56,8 +104,9 @@ def clean_and_lemmatize(text):
         and token.lemma_ not in custom_stopwords
         and len(token.lemma_) > 2
     ]
-
-    return " ".join(tokens)
+    nouns_bigrams = extract_filtered_bigrams(doc)
+    nouns_trigrams = extract_noun_trigrams(doc)
+    return " ".join(tokens + nouns_bigrams + nouns_trigrams)
 
 print("🚿 Cleaning + lemmatization processing ...")
 df["text_processed"] = df["text"].apply(clean_and_lemmatize)
@@ -82,33 +131,36 @@ print(f"✅ Agregated Corpus : {n_companies} entreprises ")
 cv_uni = CountVectorizer(
     ngram_range=(1, 1),
     min_df=0.03,   # ≥ 3% of companies 
-    max_df=0.85
+    max_df=0.85,
+    #max_features=3000
 )
 
 X_uni = cv_uni.fit_transform(df_company["text_processed"])
 uni_features = cv_uni.get_feature_names_out()
 
 # ---- Bigrams ----
-cv_bi = CountVectorizer(
+'''cv_bi = CountVectorizer(
     ngram_range=(2, 2),
     min_df=0.04,   # ≥ 4% of companies → strong relevance
-    max_df=0.85
+    max_df=0.85,
+    #max_features=2000
 )
 
 X_bi = cv_bi.fit_transform(df_company["text_processed"])
-bi_features = cv_bi.get_feature_names_out()
+bi_features = cv_bi.get_feature_names_out()'''
 
-cv_tri = CountVectorizer(
+'''cv_tri = CountVectorizer(
     ngram_range=(3, 3),
     min_df=0.05,   # ≥ 5% of companies → very strong relevance
-    max_df=0.85
+    max_df=0.85,
+    #max_features=1000
 )
 X_tri = cv_tri.fit_transform(df_company["text_processed"])
-tri_features = cv_tri.get_feature_names_out()
+tri_features = cv_tri.get_feature_names_out()'''
 
 # ---- Fusion ----
-X_tdm = hstack([X_uni, X_bi, X_tri])
-features = np.concatenate([uni_features, bi_features, tri_features])
+X_tdm = hstack([X_uni])#, X_bi]) , X_tri])
+features = np.concatenate([uni_features])#bi_features]) tri_features])
 
 print("📐 TDM shape :", X_tdm.shape)
 
