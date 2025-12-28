@@ -24,7 +24,7 @@ def main_text_analysis():
     cooc_df.to_csv("results/cooccurrence_matrix.csv")
 
     # 3. Topic Modeling (NMF)
-    n_topics = 7
+    n_topics = 6
     W, H, topics = run_nmf(df_tfidf.values, terms, n_components=n_topics)
     print(f"✅ NMF terminée : Données compressées à {n_topics} thèmes.")
     
