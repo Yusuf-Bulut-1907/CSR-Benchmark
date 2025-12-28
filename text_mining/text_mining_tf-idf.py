@@ -6,11 +6,12 @@ import numpy as np
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from scipy.sparse import hstack
+from spacy.lang.en.stop_words import STOP_WORDS
 
 from stats_and_cleaning import get_cleaned_corpus
 
-nltk.download("stopwords")
-nltk.download("punkt")
+#nltk.download("stopwords")
+#nltk.download("punkt")
 custom_stopwords = {
     "company", "business", "report", "year", "page", "website", "provide", 
     "include", "information", "service", "client", "group", "pdf", "site", 
@@ -25,6 +26,8 @@ custom_stopwords = {
 
 }
 custom_stopwords = set(nltk.corpus.stopwords.words("english")).union(custom_stopwords)
+STOP_WORDS.update(custom_stopwords)
+nlp = spacy.load("en_core_web_md", disable=["ner", "parser"])
 # =====================
 # LOAD CORPUS
 # =====================
@@ -101,12 +104,12 @@ def clean_and_lemmatize(text):
         for token in doc
         if token.is_alpha
         and not token.is_stop
-        and token.lemma_ not in custom_stopwords
+        #and token.lemma_ not in custom_stopwords
         and len(token.lemma_) > 2
     ]
     nouns_bigrams = extract_filtered_bigrams(doc)
     nouns_trigrams = extract_noun_trigrams(doc)
-    return " ".join(tokens + nouns_bigrams + nouns_trigrams)
+    return " ".join(tokens +nouns_bigrams + nouns_trigrams)
 
 print("🚿 Cleaning + lemmatization processing ...")
 df["text_processed"] = df["text"].apply(clean_and_lemmatize)
@@ -159,8 +162,8 @@ X_tri = cv_tri.fit_transform(df_company["text_processed"])
 tri_features = cv_tri.get_feature_names_out()'''
 
 # ---- Fusion ----
-X_tdm = hstack([X_uni])#, X_bi]) , X_tri])
-features = np.concatenate([uni_features])#bi_features]) tri_features])
+X_tdm = hstack([X_uni])#, X_bi, X_tri])
+features = np.concatenate([uni_features])#, bi_features, tri_features])
 
 print("📐 TDM shape :", X_tdm.shape)
 
