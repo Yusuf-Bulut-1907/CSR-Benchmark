@@ -25,7 +25,7 @@ custom_stopwords = {
     "personal_datum","privacy_policy", "adresse", "linkedin","facebook","instagram","twitter","setting", "settings"
 
 }
-custom_stopwords = set(nltk.corpus.stopwords.words("english")).union(custom_stopwords)
+#custom_stopwords = set(nltk.corpus.stopwords.words("english")).union(custom_stopwords)
 STOP_WORDS.update(custom_stopwords)
 nlp = spacy.load("en_core_web_md", disable=["ner", "parser"])
 # =====================
