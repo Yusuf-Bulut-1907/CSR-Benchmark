@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from scipy.sparse import hstack
 
-from load_corpus import load_corpus
+from stats_and_cleaning import get_cleaned_corpus
 
 nltk.download("stopwords")
 nltk.download("punkt")
@@ -24,7 +24,7 @@ custom_stopwords = set(nltk.corpus.stopwords.words("english")).union(custom_stop
 # =====================
 # LOAD CORPUS
 # =====================
-documents, metadata = load_corpus()
+documents, metadata = get_cleaned_corpus()
 
 df = pd.DataFrame({
     "text": documents,
