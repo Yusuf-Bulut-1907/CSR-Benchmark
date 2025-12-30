@@ -4,7 +4,7 @@ def load_tfidf_data(path):
     df = pd.read_csv(path, index_col=0)
     return df, df.columns, df.index
 
-def load_metadata(path):
+def load_metadata(path): 
     return pd.read_csv(
         path, 
         sep=";", 

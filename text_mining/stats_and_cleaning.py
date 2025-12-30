@@ -1,5 +1,6 @@
 import numpy as np
 import re
+import os
 from collections import Counter
 from sklearn.feature_extraction.text import CountVectorizer
 from langdetect import detect, DetectorFactory
@@ -195,8 +196,11 @@ def get_cleaned_corpus():
 
 if __name__ == "__main__":
 
+    output_folder = "results"
+    os.makedirs(output_folder, exist_ok=True)
+
     # Download txt file with corpus statistics
-    with open("corpus_statistics.txt", "w", encoding="utf-8") as f:
+    with open("results/corpus_statistics.txt", "w", encoding="utf-8") as f:
         f.write(f"Number of documents: {num_documents_initial}\n")
         f.write(f"Average document length: {avg_doc_length_initial} words\n")
         f.write(

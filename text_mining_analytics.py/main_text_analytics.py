@@ -9,8 +9,11 @@ from models import (
 from visualizers import plot_heatmap, plot_elbow_method, plot_silhouette
 from sklearn.preprocessing import normalize
 import numpy as np
+import os
 
 def main_text_analysis():
+    output_folder = "results"
+    os.makedirs(output_folder, exist_ok=True)
     # 1. Data Loading
     df_tfidf, terms, companies = load_tfidf_data("data/TFIDF_unigram_bigram_trigram.csv")
     df_uni, terms_uni, _ = load_tfidf_data("data/TFIDF_unigram.csv")
@@ -18,10 +21,10 @@ def main_text_analysis():
 
     # 2. Basic Text Analysis
     cosine_sim_df = compute_cosine_similarity(df_tfidf.values, companies)
-    cosine_sim_df.to_csv("results/cosine_similarity.csv")
+    cosine_sim_df.to_csv("results/cosine_similarity_tf_idf.csv")
     
     cooc_df = compute_cooccurrence(df_uni.values, terms_uni)
-    cooc_df.to_csv("results/cooccurrence_matrix.csv")
+    cooc_df.to_csv("results/cooccurrence_matrix_tf_idf.csv")
 
     # 3. Topic Modeling (NMF)
     n_topics = 6
@@ -107,7 +110,7 @@ def main_text_analysis():
             
             f.write(f"Dominant Keywords : {', '.join(keywords[i])}\n")
             f.write("\n" + "-"*30 + "\n\n")
-            
+
     print("✅ Report generated in results/cluster_report.txt")
 
     # 6. Visualizations and Plots
