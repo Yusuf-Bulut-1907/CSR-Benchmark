@@ -1,14 +1,15 @@
 import re
-import nltk
 import spacy
 import pandas as pd
 import numpy as np
-
+import os
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from scipy.sparse import hstack
 from spacy.lang.en.stop_words import STOP_WORDS
 
 from stats_and_cleaning import get_cleaned_corpus
+output_folder = "data"
+os.makedirs(output_folder, exist_ok=True)
 
 #nltk.download("stopwords")
 #nltk.download("punkt")
