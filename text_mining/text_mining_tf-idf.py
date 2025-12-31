@@ -11,12 +11,6 @@ from stats_and_cleaning import get_cleaned_corpus
 output_folder = "data"
 os.makedirs(output_folder, exist_ok=True)
 
-#====================
-# Check and create data folder
-#===================
-if not os.path.exists("data"):
-    os.makedirs("data")
-
 
 #====================
 # Check and create data folder
