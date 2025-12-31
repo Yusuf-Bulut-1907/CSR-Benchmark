@@ -18,6 +18,13 @@ if not os.path.exists("data"):
     os.makedirs("data")
 
 
+#====================
+# Check and create data folder
+#===================
+if not os.path.exists("data"):
+    os.makedirs("data")
+
+
 #nltk.download("stopwords")
 #nltk.download("punkt")
 custom_stopwords = {
