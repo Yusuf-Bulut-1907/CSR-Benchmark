@@ -6,9 +6,9 @@ import os
 # CONFIGURATION
 # -------------------------------
 
-#TFIDF_PATH = "data/TFIDF_unigram.csv" # Path to csv file with unigrams
-#TFIDF_PATH = "data/TFIDF_unigram_bigram_trigram.csv" # Path to csv file with bigrams and trigrams
+TFIDF_PATH = "data/TFIDF_unigram_bigram_trigram.csv" # Path to csv file with bigrams and trigrams
 OUTPUT_DIR = "gephi_graph"
+
 TFIDF_THRESHOLD = 0.1  # Minimum TF-IDF score to consider a term relevant"
 TOP_N_CONCEPTS = 10  # Number of top concepts to extract per company
 
