@@ -16,15 +16,15 @@ def main_text_analysis():
     os.makedirs(output_folder, exist_ok=True)
     # 1. Data Loading
     df_tfidf, terms, companies = load_tfidf_data("data/TFIDF_unigram_bigram_trigram.csv")
-    df_uni, terms_uni, _ = load_tfidf_data("data/TFIDF_unigram.csv")
+    #df_uni, terms_uni, _ = load_tfidf_data("data/TFIDF_unigram.csv")
     df_meta = load_metadata("data/metadata.csv")
 
     # 2. Basic Text Analysis
     cosine_sim_df = compute_cosine_similarity(df_tfidf.values, companies)
     cosine_sim_df.to_csv("results/cosine_similarity_tf_idf.csv")
     
-    cooc_df = compute_cooccurrence(df_uni.values, terms_uni)
-    cooc_df.to_csv("results/cooccurrence_matrix_tf_idf.csv")
+    #cooc_df = compute_cooccurrence(df_uni.values, terms_uni)
+    #cooc_df.to_csv("results/cooccurrence_matrix_tf_idf.csv")
 
     # 3. Topic Modeling (NMF)
     n_topics = 6
