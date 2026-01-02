@@ -10,7 +10,7 @@ analyzer = SentimentIntensityAnalyzer()
 # PATH TO THE JSON FOLDER
 #==========================
 
-JSON_FOLDER_PATH = r"c:\Users\basti\OneDrive - UCL\Master 1\WEB MINING\Projet\scraped_output" # Specify the path to the folder containing JSON files
+JSON_FOLDER_PATH = r"/Users/matteogalizia/Documents/GitHub/CSR-Benchmark/scraped_output" # Specify the path to the folder containing JSON files
 
 #==========================
 # LOADING OF THE CORPUS
