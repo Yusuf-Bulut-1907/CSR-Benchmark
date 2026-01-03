@@ -168,7 +168,7 @@ print(f"✅ Agregated Corpus : {n_companies} entreprises ")
 cv_uni = CountVectorizer(
     ngram_range=(1, 2),
     min_df=0.05,   # ≥ 3% of companies 
-    max_df=0.7,
+    max_df=0.85,
     #max_features=3000
 )
 
