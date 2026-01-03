@@ -5,7 +5,7 @@ import os
 # -------------------------------
 # CONFIGURATION
 # -------------------------------
-TFIDF_PATH = "data/TFIDF_unigram.csv" # Utilise ton fichier TF-IDF global
+TFIDF_PATH = "data/TFIDF_unigram_bigram_trigram.csv" # Utilise ton fichier TF-IDF global
 OUTPUT_DIR = "gephi_concepts"
 # On limite aux 100 concepts les plus importants pour la clarté du graphe
 TOP_N_CONCEPTS = 100 
