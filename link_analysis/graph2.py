@@ -9,7 +9,7 @@ TFIDF_PATH = "data/TFIDF_unigram_bigram_trigram.csv"
 OUTPUT_DIR = "gephi_graph"
 
 TFIDF_THRESHOLD = 0.1
-TOP_N_CONCEPTS = 10
+#TOP_N_CONCEPTS = 10
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -31,29 +31,28 @@ edges = []
 for company in companies:
     tfidf_values = df_tfidf.loc[company]
 
-    # 🔧 MODIF : seuil minimal
     selected_concepts = tfidf_values[tfidf_values >= TFIDF_THRESHOLD]
 
     if selected_concepts.empty:
         continue
-
-    # 🔧 MODIF : top-N concepts par entreprise
+"""
     selected_concepts = (
         selected_concepts
         .sort_values(ascending=False)
         .head(TOP_N_CONCEPTS)
     )
-
+"""
     for concept, weight in selected_concepts.items():
         edges.append({
             "Source": company,
             "Target": concept,
-            # 🔧 MODIF (optionnelle mais recommandée)
-            "Weight": round(np.log1p(weight), 4)
+            "Weight": round(np.log1p(weight), 4),
+            # 🔑 CLÉ : graphe explicitement non dirigé
+            "Type": "Undirected"
         })
 
 edges_df = pd.DataFrame(edges)
-edges_path = os.path.join(OUTPUT_DIR, "edges2.csv")
+edges_path = os.path.join(OUTPUT_DIR, "edges.csv")
 edges_df.to_csv(edges_path, index=False)
 
 print(f"💾 Edges CSV saved: {edges_path} ({len(edges_df)} edges)")
@@ -73,7 +72,6 @@ for company in edges_df["Source"].unique():
 
 # Concepts
 for concept in edges_df["Target"].unique():
-    # 🔧 MODIF : typage unigram / bigram / trigram
     if concept.count("_") == 0:
         concept_type = "unigram"
     elif concept.count("_") == 1:
@@ -89,7 +87,7 @@ for concept in edges_df["Target"].unique():
     })
 
 nodes_df = pd.DataFrame(nodes)
-nodes_path = os.path.join(OUTPUT_DIR, "nodes2.csv")
+nodes_path = os.path.join(OUTPUT_DIR, "nodes.csv")
 nodes_df.to_csv(nodes_path, index=False)
 
 print(f"💾 Nodes CSV saved: {nodes_path} ({len(nodes_df)} nodes)")
