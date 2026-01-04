@@ -18,7 +18,7 @@ df = pd.read_csv(INPUT_PATH)
 # PREPARE ANALYSIS
 # =========================
 
-metrics = ["degree", "weighted_degree", "betweenness", "pagerank"]
+metrics = ["degree", "normalized_degree", "weighted_degree", "betweenness", "pagerank"]
 TOP_N = 15
 
 # Global statistics
