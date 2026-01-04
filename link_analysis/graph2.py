@@ -9,7 +9,7 @@ TFIDF_PATH = "data/TFIDF_unigram_bigram_trigram.csv"
 OUTPUT_DIR = "gephi_graph"
 
 TFIDF_THRESHOLD = 0.1
-#TOP_N_CONCEPTS = 10
+TOP_N_CONCEPTS = 10
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -35,13 +35,13 @@ for company in companies:
 
     if selected_concepts.empty:
         continue
-"""
+
     selected_concepts = (
         selected_concepts
         .sort_values(ascending=False)
         .head(TOP_N_CONCEPTS)
     )
-"""
+
     for concept, weight in selected_concepts.items():
         edges.append({
             "Source": company,
