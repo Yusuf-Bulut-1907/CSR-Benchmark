@@ -100,7 +100,22 @@ df_results.rename(columns={"Type": "node_type"}, inplace=True)
 # =========================
 
 output_path = os.path.join(OUTPUT_DIR, "centrality_metrics.csv")
-df_results.sort_values("pagerank", ascending=False).to_csv(output_path, index=False)
+df_results.sort_values( by="pagerank", ascending=False ).to_csv(output_path, index=False)
 
 print("✅ Centrality metrics computed.")
 print(f"Results saved to {output_path}")
+
+print("\nTop 10 nodes by... :\n")
+print(
+    df_results
+    .sort_values("weighted_degree", ascending=False) # En fonction de ce qu'on désire analyser
+    .head(10)
+    .to_string(index=False)
+)
+
+avg_degree = df_results["degree"].mean()
+avg_weighted_degree = df_results["weighted_degree"].mean()
+
+print("\nAverage centrality values:\n")
+print(f"Average degree: {avg_degree:.2f}")
+print(f"Average weighted degree: {avg_weighted_degree:.4f}")
