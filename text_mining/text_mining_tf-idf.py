@@ -34,6 +34,7 @@ custom_stopwords = {
     "personal_datum","privacy_policy", "adresse", "linkedin","facebook","instagram","twitter","setting", "settings"
 
 }
+
 #custom_stopwords = set(nltk.corpus.stopwords.words("english")).union(custom_stopwords)
 STOP_WORDS.update(custom_stopwords)
 nlp = spacy.load("en_core_web_md", disable=["ner", "parser"])
@@ -113,7 +114,7 @@ def clean_and_lemmatize(text):
         for token in doc
         if token.is_alpha
         and not token.is_stop
-        #and token.lemma_ not in custom_stopwords
+        and token.pos_ == "NOUN"
         and len(token.lemma_) > 2
     ]
     nouns_bigrams = extract_filtered_bigrams(doc)
