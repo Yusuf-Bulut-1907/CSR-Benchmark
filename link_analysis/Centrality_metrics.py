@@ -42,6 +42,12 @@ df_degree = pd.DataFrame(
     columns=["node", "degree"]
 )
 
+normalized_degree_dict = nx.degree_centrality(G)
+df_normalized_degree = pd.DataFrame(
+    normalized_degree_dict.items(),
+    columns=["node", "normalized_degree"]
+)
+
 df_weighted_degree = pd.DataFrame(
     G.degree(weight="weight"),
     columns=["node", "weighted_degree"]
@@ -81,6 +87,7 @@ df_pagerank = pd.DataFrame(
 # =========================
 
 df_results = df_degree \
+    .merge(df_normalized_degree, on="node") \
     .merge(df_weighted_degree, on="node") \
     .merge(df_betweenness, on="node") \
     .merge(df_pagerank, on="node")
@@ -104,18 +111,3 @@ df_results.sort_values( by="pagerank", ascending=False ).to_csv(output_path, ind
 
 print("✅ Centrality metrics computed.")
 print(f"Results saved to {output_path}")
-
-print("\nTop 10 nodes by... :\n")
-print(
-    df_results
-    .sort_values("weighted_degree", ascending=False) # En fonction de ce qu'on désire analyser
-    .head(10)
-    .to_string(index=False)
-)
-
-avg_degree = df_results["degree"].mean()
-avg_weighted_degree = df_results["weighted_degree"].mean()
-
-print("\nAverage centrality values:\n")
-print(f"Average degree: {avg_degree:.2f}")
-print(f"Average weighted degree: {avg_weighted_degree:.4f}")
