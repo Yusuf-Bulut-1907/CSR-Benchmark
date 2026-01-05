@@ -12,8 +12,8 @@ scikit-learn
 langdetect
 scipy
 justext
-spacy==3.7.2
-en-core-web-md==3.7.1
+spacy
+en-core-web-md
 xlsxwriter
 networkx
 matplotlib
