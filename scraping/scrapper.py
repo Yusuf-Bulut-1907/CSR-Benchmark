@@ -24,30 +24,31 @@ Notes:
 
 """
 
-import requests
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin, urlparse
-import json
-import time
-import random
-import logging
-import sys
-from tqdm import tqdm
-import os
-from companies_to_scrape import companies_to_scrape
+import requests                         # HTTP client for web requests
+from bs4 import BeautifulSoup           # HTML parsing library
+from urllib.parse import urljoin, urlparse  # URL normalization and domain checks
+import json                             # JSON serialization
+import time                             # Delays between requests
+import random                           # Randomized polite delays
+import logging                          # Logging of errors and debug information
+import sys                              # System exit handling
+from tqdm import tqdm                   # Progress bar for scraping status
+import os                               # File system operations
+
+from companies_to_scrape import companies_to_scrape  # Input: company -> start URL
 
 
-print("--- Strating the scraper ---") 
-
-# ----------------------
+# ======================
 # Configuration
-# ----------------------
+# ======================
 
+# HTTP headers used to mimic a real browser and reduce basic bot blocking
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Accept-Language': 'en-US,en;q=0.9',
 }
 
+# List of ESG-related keywords used for text-based relevance filtering
 KEYWORDS = [ 
     #strict_keywords
     "esg", "csr","esg report",
@@ -60,7 +61,7 @@ KEYWORDS = [
     "carbon footprint",
     "scope 1",
     "scope 2",
-    "scope 3"
+    "scope 3",
     # Environment
     "sustainability",
     "sustainable",
@@ -92,6 +93,8 @@ KEYWORDS = [
     "stakeholder"
 ]
 
+# Keywords used specifically for URL-based filtering
+# These keywords help reduce the crawl space early in the process
 KEYWORDS_URL = [
     # --- Piliers Généraux ---
     "sustainability", "sustainable", "csr", "esg", "responsibility", 
@@ -114,51 +117,66 @@ KEYWORDS_URL = [
     "governance", "ethics", "compliance", "policy", "integrity", 
     "transparency", "stakeholder"
 ]
-EXCLUDE_URLS = ["facebook", "twitter", "linkedin", "instagram", "youtube", "login", "register"]
 
+EXCLUDE_URLS = [
+    "facebook", "twitter", "linkedin", "instagram", "youtube", "login", "register"]
+# URLs containing these terms are excluded to avoid irrelevant or external pages
 KEYWORDS = [k.lower() for k in KEYWORDS]
 KEYWORDS_URL = [k.lower() for k in KEYWORDS_URL]
 EXCLUDE_URLS = [u.lower() for u in EXCLUDE_URLS]
 
-# polite settings
-REQUEST_TIMEOUT = 12
-MIN_DELAY = 0.4
-MAX_DELAY = 1.0
-MAX_RETRIES = 2
+# Polite crawling parameters
+REQUEST_TIMEOUT = 12    # Maximum time waiting for a server response
+MIN_DELAY = 0.4         # Minimum delay between requests
+MAX_DELAY = 1.0         # Maximum delay between requests
+MAX_RETRIES = 2         # Number of retry attempts per request
 
-# ----------------------
-# Utility helpers
-# ----------------------
+# ======================
+# Utility helper functions
+# ======================
 
 def same_domain(base_url, new_url):
+    """
+    Checks whether two URLs belong to the same domain.
+    This prevents the crawler from leaving the target website.
+    """
     try:
         return urlparse(base_url).netloc == urlparse(new_url).netloc
     except Exception:
         return False
 
-
 def is_relevant_url(url):
+    """
+    Determines whether a URL is potentially relevant based on ESG-related keywords.
+    URL-based filtering helps reduce the number of pages to crawl.
+    """
     u = url.lower()
-
+     # Exclude known irrelevant or external platforms
     if any(x in u for x in EXCLUDE_URLS):
         return False 
     
+    # Check for the presence of ESG-related keywords in the URL
     for k in KEYWORDS_URL:
         if k in u or k.replace('-', '_') in u:
             return True 
             
     return False 
 
-
 def contains_keyword_text(text):
+    """
+    Checks whether a text contains any ESG-related keyword.
+    This function is used for content-based relevance filtering.
+    """
     if not text:
         return False
     t = text.lower()
     return any(k in t for k in KEYWORDS)
 
-
-# safe get with retries
 def safe_get(session, url):
+    """
+    Performs an HTTP GET request with retry logic.
+    This helps handle transient network errors gracefully.
+    """
     for attempt in range(MAX_RETRIES + 1):
         try:
             r = session.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT, allow_redirects=True)
@@ -168,21 +186,22 @@ def safe_get(session, url):
             time.sleep(0.5 + attempt * 0.5)
     return None
 
-
-
 def extract_page(soup, url, company):
+    """
+    Extracts structured information from a parsed HTML page.
+    """
 
-    # 1. Links (avant nettoyage)
+    # 1. Extract all hyperlinks before cleaning the DOM
     links = []
     for a in soup.find_all("a", href=True):
         full = urljoin(url, a.get("href"))
         links.append(full)
 
-    # 2. Remove noise
+    # 2. Remove non-informative or navigational elements
     for noise in soup(["script", "style", "nav", "footer", "header", "aside"]):
         noise.decompose()
 
-    # 3. Metadata
+    # 3. Extract metadata
     title = soup.title.string.strip() if soup.title and soup.title.string else ""
     subtitles = [
         h.get_text(strip=True)
@@ -190,7 +209,7 @@ def extract_page(soup, url, company):
         if h.get_text(strip=True)
     ]
 
-    # 4. Main content
+    # 4. Extract main textual content
     main = soup.find("main") or soup.find("article")
     if main:
         text = main.get_text(separator=" ", strip=True)
@@ -209,43 +228,52 @@ def extract_page(soup, url, company):
         "links": links
     }
 
-
-# ----------------------
+# ======================
 # Main scraping function
-# ----------------------
+# ======================
 
 def scrape_company(company, start_url, max_depth=1, check_text_for_keywords=True, out_dir="output"):
+    """
+    Scrapes ESG-related pages for a single company using BFS traversal.
+    """
+        
     session = requests.Session()
 
-    visited = set()
-    results = []
+    visited = set()      # Keeps track of already visited URLs
+    results = []         # Stores extracted ESG-relevant pages
 
     # BFS queue of (url, depth)
     to_visit = [(start_url, 0)]
 
-    # prepare output dir
+    # Create output directory if it does not exist
     os.makedirs(out_dir, exist_ok=True)
 
+    # Progress bar indicating number of relevant pages collected
     pbar = tqdm(total=0, desc=f"{company}", unit="page", leave=False)
 
     while to_visit:
         url, depth = to_visit.pop(0)
 
+        # Skip already visited URLs
         if url in visited:
             continue
+
+        # Stop traversal when maximum depth is reached
         if depth > max_depth:
             continue
 
         visited.add(url)
 
-        # polite delay
+        # Apply a polite randomized delay
         time.sleep(random.uniform(MIN_DELAY, MAX_DELAY))
 
+        #Fetch the page safely
         r = safe_get(session, url)
         if r is None:
             logging.debug(f"Failed to fetch {url}")
             continue
 
+        #Only process HTML pages
         content_type = r.headers.get("Content-Type", "").lower()
         if "text/html" not in content_type:
             # skip non-HTML content
@@ -265,21 +293,23 @@ def scrape_company(company, start_url, max_depth=1, check_text_for_keywords=True
 
         page_struct = extract_page(soup, url, company)
 
-        # decide whether to keep this page
+        # Determine wether the page shoulld be kept
         keep = False
-        # 1) url contains keywords
+
+        # Criterion 1: URL-based relevance
         if is_relevant_url(url):
             keep = True
-        # 2) OR page text contains keywords (if enabled)
+       # Criterion 2: content-based relevance
         if not keep and check_text_for_keywords and contains_keyword_text(page_struct.get("text", "") + " " + page_struct.get("title", "")):
             keep = True
 
+        # Store relevant pages
         if keep:
             results.append(page_struct)
             pbar.total += 1
             pbar.refresh()
 
-        # find candidate links to continue crawling
+        # Discover new URLs to visit
         for link in page_struct["links"]:
             if not same_domain(start_url, link):
                 continue
@@ -287,14 +317,14 @@ def scrape_company(company, start_url, max_depth=1, check_text_for_keywords=True
             link = link.split('#')[0]
             if link in visited:
                 continue
-            # add link if either url looks relevant or depth < max_depth
-            # we use url-relevance to reduce queue size
+            # Add link if either url looks relevant or depth < max_depth
+            # We use url-relevance to reduce queue size
             if is_relevant_url(link) and depth < max_depth:
                 to_visit.append((link, depth + 1))
 
     pbar.close()
 
-    # save results
+    # Save extracted data as a JSON file
     filename = os.path.join(out_dir, f"{company.replace(' ', '_')}_rse.json")
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
@@ -302,10 +332,9 @@ def scrape_company(company, start_url, max_depth=1, check_text_for_keywords=True
     print(f"Scraping finished for {company} — {len(results)} pages saved to {filename}")
     return filename
 
-
-# ----------------------
-# Example companies (replace / extend as needed)
-# ----------------------
+# ======================
+# Script entry point
+# ======================
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
