@@ -13,7 +13,6 @@ langdetect
 scipy
 justext
 spacy
-en-core-web-md
 xlsxwriter
 networkx
 matplotlib
