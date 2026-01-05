@@ -1,4 +1,4 @@
-companies_to_scrap = {    "Apple": "https://www.apple.com/environment/",
+companies_to_scrape = {    "Apple": "https://www.apple.com/environment/",
     "Google": "https://www.sustainability.google/",
     "Amazon": "https://sustainability.aboutamazon.com/",
     "Meta": "https://sustainability.fb.com/",
