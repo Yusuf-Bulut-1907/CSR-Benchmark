@@ -1,7 +1,6 @@
 import pandas as pd
 import networkx as nx
 import os
-from Load_Graph_nondirect import load_graph
 
 # -------------------------------
 # CONFIGURATION
@@ -14,16 +13,33 @@ OUTPUT_DIR = "results"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # =========================
-# LOAD GRAPH (INVERT WEIGHTS)
+# LOAD NODES AND EDGES
 # =========================
 
-G, nodes = load_graph(
-    NODES_PATH,
-    EDGES_PATH,
-    invert_weights=True
-)
+nodes = pd.read_csv(NODES_PATH)
+edges = pd.read_csv(EDGES_PATH)
 
-print(f"Graph loaded with {G.number_of_nodes()} nodes and {G.number_of_edges()} edges.")
+# =========================
+# BUILD DISTANCE GRAPH
+# =========================
+
+G = nx.Graph()
+
+# Add nodes
+for _, row in nodes.iterrows():
+    G.add_node(row["Id"], node_type=row["Type"])
+
+# Add edges with inverted weights (distance)
+for _, row in edges.iterrows():
+    if row["Weight"] > 0:
+        weight = 1 / row["Weight"]
+        G.add_edge(
+            row["Source"],
+            row["Target"],
+            weight=weight
+        )
+
+print(f"Distance graph loaded: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges.")
 
 # =========================
 # SHORTEST PATHS BETWEEN COMPANIES

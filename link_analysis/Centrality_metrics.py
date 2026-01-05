@@ -1,7 +1,6 @@
 import pandas as pd
 import networkx as nx
 import os
-from Load_Graph_nondirect import load_graph
 
 # -------------------------------
 # CONFIGURATION
@@ -14,24 +13,52 @@ OUTPUT_DIR = "results"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # =========================
-# LOAD GRAPH
+# LOAD NODES AND EDGES
 # =========================
 
-# Load graph with raw TF-IDF (for degree & pagerank)
-G, nodes = load_graph(
-    NODES_PATH,
-    EDGES_PATH,
-    invert_weights=False
-)
+nodes = pd.read_csv(NODES_PATH)
+edges = pd.read_csv(EDGES_PATH)
 
-# Load graph with inverted weights (for betweenness)
-G_dist, _ = load_graph(
-    NODES_PATH,
-    EDGES_PATH,
-    invert_weights=True
-)
+# =========================
+# GRAPH 1: Similarity graph
+# (Degree & PageRank)
+# =========================
 
-print(f"Graph loaded with {G.number_of_nodes()} nodes and {G.number_of_edges()} edges.")
+G = nx.Graph()
+
+# Add nodes
+for _, row in nodes.iterrows():
+    G.add_node(row["Id"], node_type=row["Type"])
+
+# Add edges (TF-IDF similarity)
+for _, row in edges.iterrows():
+    G.add_edge(
+        row["Source"],
+        row["Target"],
+        weight=row["Weight"]
+    )
+
+print(f"Similarity graph loaded: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges.")
+
+# =========================
+# GRAPH 2: Distance graph
+# (Betweenness)
+# =========================
+
+G_dist = nx.Graph()
+
+# Add nodes
+for _, row in nodes.iterrows():
+    G_dist.add_node(row["Id"], node_type=row["Type"])
+
+# Add edges with inverted weights
+for _, row in edges.iterrows():
+    weight = 1 / row["Weight"] if row["Weight"] > 0 else 0
+    G_dist.add_edge(
+        row["Source"],
+        row["Target"],
+        weight=weight
+    )
 
 # =========================
 # DEGREE CENTRALITY
@@ -42,15 +69,15 @@ df_degree = pd.DataFrame(
     columns=["node", "degree"]
 )
 
-normalized_degree_dict = nx.degree_centrality(G)
-df_normalized_degree = pd.DataFrame(
-    normalized_degree_dict.items(),
-    columns=["node", "normalized_degree"]
+norm_degree_dict = nx.degree_centrality(G)
+df_norm_degree = pd.DataFrame(
+    norm_degree_dict.items(),
+    columns=["node", "norm_degree"]
 )
 
-df_weighted_degree = pd.DataFrame(
+df_weight_degree = pd.DataFrame(
     G.degree(weight="weight"),
-    columns=["node", "weighted_degree"]
+    columns=["node", "weight_degree"]
 )
 
 # =========================
@@ -67,6 +94,20 @@ df_betweenness = pd.DataFrame(
     betweenness.items(),
     columns=["node", "betweenness"]
 )
+
+
+# =========================
+# CLOSENESS CENTRALITY
+# =========================
+
+df_closeness = pd.DataFrame(
+    nx.closeness_centrality(
+        G_dist,
+        distance="weight"
+    ).items(),
+    columns=["node", "closeness"]
+)
+
 
 # =========================
 # PAGERANK
@@ -87,9 +128,10 @@ df_pagerank = pd.DataFrame(
 # =========================
 
 df_results = df_degree \
-    .merge(df_normalized_degree, on="node") \
-    .merge(df_weighted_degree, on="node") \
+    .merge(df_norm_degree, on="node") \
+    .merge(df_weight_degree, on="node") \
     .merge(df_betweenness, on="node") \
+    .merge(df_closeness, on="node") \
     .merge(df_pagerank, on="node")
 
 # Add node type
