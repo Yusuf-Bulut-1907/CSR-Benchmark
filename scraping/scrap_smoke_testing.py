@@ -1,3 +1,14 @@
+"""
+    Performs a smoke test on a dictionary of company URLs.
+
+    Parameters:
+    - companies_dict: dictionary {company_name: url}
+
+    Returns:
+    - success: URLs that are reachable and return meaningful HTML content
+    - blocked: URLs that explicitly block access (401 / 403)
+    - error: URLs that return unexpected responses or raise exceptions
+"""
 import requests
 import time
 from companies_to_scrape import companies_to_scrape
@@ -9,7 +20,9 @@ def test_company_urls(companies_dict):
     blocked  = {}
     error    = {}
 
+# Use a realistitc User-Agent to avoid basic blocking mechanisms
     headers = {
+        \
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
             "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -17,28 +30,36 @@ def test_company_urls(companies_dict):
         )
     }
 
+    # Iterate over each company and its homepage URL
     for name, url in companies_dict.items():
         try:
+            # Send HTTP GET request
             response = requests.get(url, headers=headers, timeout=10)
-
+            
+            # Case 1: Successful response with sufficient content length
             if response.status_code == 200 and len(response.text) > 500:
                 success[name] = url
 
+            # Case 2: Explicit access restriction
             elif response.status_code in [401, 403]:
                 blocked[name] = url
-
+            
+            # Case 3: Any other unexpected response
             else:
                 error[name] = url
 
+        # Network issues, timeouts, DNS errors, etc
         except Exception:
             error[name] = url
 
+        # Polite delay to avoid aggressive request patterns
         time.sleep(0.5)  
 
     return success, blocked, error
 
 
 def save_results(success, blocked, error):
+    # Saves the smoke test results. into a strcitured text file
     with open("smoke_test_results.txt", "w", encoding="utf-8") as f:
         f.write("SMOKE TEST RESULTS\n")
         f.write("=" * 50 + "\n\n")
@@ -49,13 +70,14 @@ def save_results(success, blocked, error):
         f.write("\n\nERRORS:\n")
         f.write("\n".join(f"{name}: {url}" for name, url in error.items()))
 
+    # Console summary
     print("\n📊 TEST COMPLETED")
     print(f"✅ Success  : {len(success)}")
     print(f"🚫 Blocked  : {len(blocked)}")
     print(f"❌ Errors   : {len(error)}")
     print(f"\n📁 RResults saved to: {OUTPUT_FILE}")
 
-
+# Script entry point
 if __name__ == "__main__":
     print("🚀 STARTING SMOKE TEST ON COMPANY URLS...\n")
     success, blocked, error = test_company_urls(companies_to_scrape)
