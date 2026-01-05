@@ -45,7 +45,7 @@ def main_text_analysis():
     )
     
     # Load metadata (sector, country, etc.)    
-    df_meta = load_metadata("data/metadata.csv")
+    df_meta = load_metadata()
 
     # ==========================
     # 2. BASIC TEXT ANALYSIS

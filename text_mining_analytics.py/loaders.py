@@ -13,6 +13,7 @@ and reporting.
 """
 
 import pandas as pd
+from company_metadata import COMPANY_METADATA
 
 def load_tfidf_data(path):
     """
@@ -37,30 +38,15 @@ def load_tfidf_data(path):
     df = pd.read_csv(path, index_col=0)
     return df, df.columns, df.index
 
-def load_metadata(path): 
+
+def load_metadata():
     """
-    Load company-level metadata from a CSV file.
-
-    The metadata file is expected to use a semicolon (';') as separator,
-    which is common in European CSV exports.
-
-    Parameters
-    ----------
-    path : str
-        Path to the metadata CSV file.
-
-    Returns
-    -------
-    pandas.DataFrame
-        A DataFrame containing descriptive attributes
-        (e.g., sector, country, size).
+    Load company metadata from a Python module
+    instead of a CSV file (confidential data).
     """
-    return pd.read_csv(
-        path, 
-        sep=";", 
-        on_bad_lines='warn', 
-        encoding='utf-8'
-    )
+    return pd.DataFrame(COMPANY_METADATA)
+
+
 
 def merge_results(companies, clusters, df_meta):
     """
