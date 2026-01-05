@@ -10,7 +10,7 @@ TFIDF_PATH = "data/TFIDF_unigram_bigram_trigram.csv" # Path to csv file with big
 OUTPUT_DIR = "gephi_graph"
 
 TFIDF_THRESHOLD = 0.1  # Minimum TF-IDF score to consider a term relevant"
-TOP_N_CONCEPTS = 10  # Number of top concepts to extract per company
+#TOP_N_CONCEPTS = 10  # Number of top concepts to extract per company
 
 os.makedirs(OUTPUT_DIR, exist_ok=True) # Create output directory if it doesn't exist
 
@@ -35,8 +35,8 @@ for company in companies:
     # Filter concepts by TF-IDF threshold
     relevant_concepts = tfidf_scores[tfidf_scores >= TFIDF_THRESHOLD]
     # Get top N concepts
-    if len(relevant_concepts) > TOP_N_CONCEPTS:
-        relevant_concepts = relevant_concepts.sort_values(ascending=False).head(TOP_N_CONCEPTS)
+    #if len(relevant_concepts) > TOP_N_CONCEPTS:
+      #  relevant_concepts = relevant_concepts.sort_values(ascending=False).head(TOP_N_CONCEPTS)
     for concept, weight in relevant_concepts.items():
         edges.append({
             "Source": company,
