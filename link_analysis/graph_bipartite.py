@@ -5,7 +5,7 @@ import os
 # -------------------------------
 # Configuration
 # -------------------------------
-TFIDF_PATH = "data/TFIDF_RSE_unigram_bigram.csv"
+TFIDF_PATH = "data/TFIDF_unigram_bigram_trigram.csv"
 OUTPUT_DIR = "gephi_graph"
 
 TFIDF_THRESHOLD = 0.1
@@ -35,7 +35,7 @@ for company in companies:
 
     if selected_concepts.empty:
         continue
-    """"       
+    """       
     selected_concepts = (
         selected_concepts
         .sort_values(ascending=False)
