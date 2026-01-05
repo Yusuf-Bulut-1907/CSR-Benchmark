@@ -2,11 +2,18 @@
 
 requests
 beautifulsoup4
-tqdm
-pandas
 bs4
+tqdm
+html5lib
+numpy
+pandas
 nltk
 scikit-learn
+langdetect
+scipy
+justext
 spacy
-jusText
-en-core-web-md
+xlsxwriter
+networkx
+matplotlib
+seaborn

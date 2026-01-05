@@ -59,5 +59,5 @@ df_results = pd.DataFrame(results)
 output_path = os.path.join(OUTPUT_DIR, "shortest_paths_companies.csv")
 df_results.sort_values("semantic_distance").to_csv(output_path, index=False)
 
-print("✅ Step 6 – Shortest paths computed.")
+print("✅  – Shortest paths computed.")
 print(f"Results saved to {output_path}")

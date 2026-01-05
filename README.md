@@ -63,6 +63,11 @@ Install all necessary project libraries listed in the `requirements.txt` file:
 ```bash
 pip install -r requirements.txt
 ```
+After installing the libraries, download the SpaCy English model required for NLP tasks:
+
+```bash
+pip python -m spacy download en_core_web_md
+```
 ## Scraping
 
 The objective of this step is to automatically collect the CSR-related pages from the websites of selected companies. This allows us to build a structured corpus of textual data for further analysis.
