@@ -1,3 +1,16 @@
+"""
+Corpus Statistics and Cleaning Pipeline
+---------------------------------------
+
+This script performs descriptive statistics and successive cleaning steps
+on a textual corpus previously extracted from CSR / ESG-related web pages.
+
+The objectives are:
+- Quantify corpus properties before and after cleaning
+- Remove low-quality, noisy, duplicated, or non-English documents
+- Produce transparent, reproducible corpus statistics for reporting
+"""
+
 import numpy as np
 import re
 import os
@@ -7,34 +20,45 @@ from langdetect import detect, DetectorFactory
 
 from load_corpus import load_corpus
 
+
+# Load raw corpus and metadata
 documents, metadata = load_corpus()
 
-#============================
-# Statistics and cleaning
-#============================
+# ============================
+# Initial statistics
+# ============================
 
-companies_before = set(meta.get("company") for meta in metadata if meta.get("company")) # Store companies before cleaning
+# Store the list of companies before any cleaning step
+# This allows tracking which companies may be fully removed by filtering
+companies_before = set(meta.get("company") for meta in metadata if meta.get("company")) 
 
 
-# Number of documents
+# Initial number of documents
 num_documents_initial = len(documents)
 
-# Average document length
+# Document length distribution (in words)
 doc_lengths = [len(doc.split()) for doc in documents]
 avg_doc_length_initial = np.mean(doc_lengths).round(2)
 
-# Maximum and minimum document length
+# Extreme document lengths
 max_doc_length_initial = np.max(doc_lengths)
 min_doc_length_initial = np.min(doc_lengths)
+
+# Titles associated with longest and shortest documents
 max_doc_title_initial = metadata[np.argmax(doc_lengths)]['title']
 min_doc_title_initial = metadata[np.argmin(doc_lengths)]['title']
 
-# Vocabulary size
+# Initial vocabulary size (raw corpus)
 vectorizer = CountVectorizer()
 X = vectorizer.fit_transform(documents)
 vocab_size_initial = len(vectorizer.get_feature_names_out())
 
-# Remove short documents (less than 50 words)
+# ============================
+# Removal of very short documents
+# ============================
+
+# Documents shorter than 50 words are removed
+# These are typically navigation pages, cookie banners, or empty pages
 filtered_documents = []
 filtered_metadata = []
 
@@ -54,15 +78,19 @@ X = vectorizer.fit_transform(documents)
 vocab_size_after_short = len(vectorizer.get_feature_names_out())
 
 
-# Delete documents witch are not well scraped (eg. "Loading...", "Error 404", etc.)
+# ============================
+# Removal of poorly scraped pages
+# ============================
+
+# Regex patterns capturing typical scraping failures or error pages
 unwanted_patterns = [
-    # Phrases indicating loading or incomplete content
+    # Loading / incomplete pages
     r"loading",
     r"please\s+wait",
     r"under\s+construction",
     r"coming\s+soon",
 
-    # Error messages
+    # HTTP and server errors
     r"404",
     r"403",
     r"500",
@@ -71,7 +99,7 @@ unwanted_patterns = [
     r"http\s+error",
     r"server\s+error",
 
-    # Not found messages
+    # Page not found
     r"page\s+not\s+found",
     r"not\s+found",
     r"an\s+error\s+occurred",
@@ -79,26 +107,30 @@ unwanted_patterns = [
     r"temporarily\s+unavailable",
     r"service\s+unavailable",
 
-    # Access denied messages
+    # Access restriction
     r"access\s+denied",
     r"forbidden",
     r"unauthorized",
     r"permission\s+denied",
 
-    # JavaScript and cookie requirements
+    # JavaScript / cookie walls
     r"enable\s+javascript",
     r"cookies\s+required",
     r"verify\s+you\s+are\s+human",
     r"captcha",
 ]
 
+# Compile regex once for efficiency
 cleaned_documents = []
 cleaned_metadata = []
+
 pattern_regex = re.compile("|".join(unwanted_patterns), re.IGNORECASE) # Compile regex pattern once for efficiency
 
 for doc, meta in zip(documents, metadata):
     title = meta.get("title", "")
-    text_start = doc[:100].lower()  # Check only the beginning of the document text
+        # Only the beginning of the document is checked to reduce false positives
+    text_start = doc[:100].lower()  
+
     if not pattern_regex.search(title) and not pattern_regex.search(text_start):
         cleaned_documents.append(doc)
         cleaned_metadata.append(meta)
@@ -114,7 +146,12 @@ X = vectorizer.fit_transform(documents)
 vocab_size_after_unwanted = len(vectorizer.get_feature_names_out())
 
 
-#Elimination of redundant documents (duplicates)
+# ============================
+# Duplicate removal
+# ============================
+
+# Exact-duplicate removal based on full document text
+# This avoids overweighting duplicated pages across websites
 unique_documents = []
 unique_metadata = []
 seen_texts = set()
@@ -136,17 +173,23 @@ X = vectorizer.fit_transform(documents)
 vocab_size_after_duplicates = len(vectorizer.get_feature_names_out())
 
 
-# Detect if there are non-English documents (using langdetect)
+# ============================
+# Language detection and filtering
+# ============================
+
+# Fix random seed to ensure reproducible language detection
 DetectorFactory.seed = 0  # For consistent results
 non_english_docs = []
 
 for i, doc in enumerate(documents):
     try:
-        sample = doc[:500]  # Sample the first 500 characters for detection to improve speed
+        # Language detection is applied to a text sample for efficiency
+        sample = doc[:500]  
         lang = detect(sample)
         if lang != 'en':
             non_english_docs.append((i, lang, metadata[i].get("title")))
     except:
+        # Detection failures are silently ignored
         continue
 
 num_non_english_docs = len(non_english_docs)
@@ -173,24 +216,31 @@ X = vectorizer.fit_transform(documents)
 vocab_size_final = len(vectorizer.get_feature_names_out())
 
 
+# ============================
 # Final corpus statistics
+# ============================
 final_doc_lengths = [len(doc.split()) for doc in documents]
 avg_doc_length_final = np.mean(final_doc_lengths).round(2)
 max_doc_length_final = np.max(final_doc_lengths)
 min_doc_length_final = np.min(final_doc_lengths)
 
 
-# List of companies and number of documents per company
+# Document count per company
 company_counts = Counter(meta.get("company") for meta in metadata if meta.get("company"))
 sorted_companies = company_counts.most_common()  # liste de tuples (company, count)
 
-# List the companies that have been removed due to cleaning
+# Identify companies entirely removed during cleaning
 companies_after = set(meta.get("company") for meta in metadata if meta.get("company"))
 removed_companies = companies_before - companies_after
 
 
-# Return cleaned documents and metadata
+# ============================
+# Public accessor
+# ============================
 def get_cleaned_corpus():
+    """
+    Returns the fully cleaned corpus and associated metadata.
+    """
     return documents, metadata
 
 
