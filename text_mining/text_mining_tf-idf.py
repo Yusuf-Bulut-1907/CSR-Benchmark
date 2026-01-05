@@ -1,3 +1,21 @@
+"""
+Text Representation Pipeline for CSR / ESG Analysis
+--------------------------------------------------
+
+This script transforms a cleaned textual corpus into structured
+text representations suitable for quantitative analysis.
+
+Main steps:
+- Linguistic cleaning and lemmatization using spaCy
+- Extraction of linguistically meaningful unigrams, bigrams, and trigrams
+- Aggregation of documents at the company level
+- Construction of Term-Document Matrices (TDM)
+- Computation of TF-IDF representations
+
+The resulting matrices are exported for downstream analysis
+(e.g., clustering, topic modeling, similarity analysis).
+"""
+
 import re
 import spacy
 import pandas as pd
@@ -8,19 +26,26 @@ from scipy.sparse import hstack
 from spacy.lang.en.stop_words import STOP_WORDS
 
 from stats_and_cleaning import get_cleaned_corpus
+
+# ====================
+# Output folder
+# ====================
+
 output_folder = "data"
 os.makedirs(output_folder, exist_ok=True)
 
 
-#====================
-# Check and create data folder
-#===================
+# Redundant safety check to ensure the data directory exists
 if not os.path.exists("data"):
     os.makedirs("data")
 
 
-#nltk.download("stopwords")
-#nltk.download("punkt")
+# ====================
+# Custom stopwords
+# ====================
+
+# Domain-specific stopwords capturing generic corporate,
+# legal, GDPR-related, and multilingual noise terms
 custom_stopwords = {
     "company", "business", "report", "year", "page", "website", "provide", 
     "include", "information", "service", "client", "group", "pdf", "site", 
@@ -35,11 +60,14 @@ custom_stopwords = {
 
 }
 
-#custom_stopwords = set(nltk.corpus.stopwords.words("english")).union(custom_stopwords)
+# Extend spaCy's default stopword list with domain-specific terms
 STOP_WORDS.update(custom_stopwords)
+
+# Load spaCy English model with lightweight pipeline
 nlp = spacy.load("en_core_web_md", disable=["ner", "parser"])
+
 # =====================
-# LOAD CORPUS
+# LOAD CLEANED CORPUS
 # =====================
 documents, metadata = get_cleaned_corpus()
 
@@ -52,13 +80,18 @@ print(f"📄 Files loaded : {len(df)}")
 print(f"🏢 Unique companies : {df['company'].nunique()}")
 
 # =====================
-# CLEANING + LEMMATIZATION (SPACY)
+# CLEANING + LEMMATIZATION 
 # =====================
 nlp = spacy.load("en_core_web_md", disable=["ner", "parser"])
+
 def extract_noun_trigrams(doc):
     """
-    Extract NOUN-NOUN-NOUN or PROPN-NOUN-NOUN trigrams from a spaCy Doc.
-    Returns a list of lemmatized trigrams joined with '_'.
+    Extract noun-based trigrams:
+    - NOUN–NOUN–NOUN
+    - PROPN–NOUN–NOUN
+
+    Trigrams are lemmatized and joined using underscores.
+    This targets compound CSR/ESG concepts (e.g., carbon_emission_reduction).
     """
     trigrams = []
 
@@ -75,12 +108,16 @@ def extract_noun_trigrams(doc):
                 trigrams.append(trigram)
 
     return trigrams
+
 def extract_filtered_bigrams(doc):
     """
     Extract linguistically meaningful bigrams:
     - ADJ + NOUN
     - NOUN + NOUN
     - PROPN + NOUN
+
+    These structures capture descriptive and thematic expressions
+    typical of sustainability discourse.
     """
     bigrams = []
 
@@ -100,8 +137,16 @@ def extract_filtered_bigrams(doc):
             bigrams.append(bigram)
 
     return bigrams
+
 def clean_and_lemmatize(text):
-    # nettoyage physique
+    """
+    Perform surface-level cleaning and linguistic normalization:
+    - Lowercasing
+    - Removal of URLs, HTML tags, and digits
+    - Lemmatization using spaCy
+    - Retention of noun-based unigrams, bigrams, and trigrams
+    """
+     # Basic text cleaning
     text = text.lower()
     text = re.sub(r"https?://\S+|www\.\S+", " ", text)
     text = re.sub(r"<.*?>", " ", text)
@@ -109,6 +154,7 @@ def clean_and_lemmatize(text):
 
     doc = nlp(text)
 
+    # Extract lemmatized noun unigrams
     tokens = [
         token.lemma_
         for token in doc
@@ -124,9 +170,12 @@ def clean_and_lemmatize(text):
 print("🚿 Cleaning + lemmatization processing ...")
 df["text_processed"] = df["text"].apply(clean_and_lemmatize)
 
-# =====================
-# GROUP BY COMPANY
-# =====================
+# ====================
+# AGGREGATION BY COMPANY
+# ====================
+
+# Documents are concatenated at the company level
+# Each company becomes a single aggregated document
 df_company = (
     df.groupby("company")["text_processed"]
       .apply(lambda x: " ".join(x))
@@ -137,13 +186,13 @@ n_companies = len(df_company)
 print(f"✅ Agregated Corpus : {n_companies} entreprises ")
 
 # =====================
-# TDM : UNIGRAMS + BIGRAMS
+# TERM-DOCUMENT MATRIX (TDM)
 # =====================
 
 # ---- Unigrams ----
 cv_uni = CountVectorizer(
     ngram_range=(1, 1),
-    min_df=0.03,   # ≥ 3% of companies 
+    min_df=0.03,   # Tem appears in at least 3% of companies
     max_df=0.85,
     #max_features=3000
 )
@@ -151,34 +200,16 @@ cv_uni = CountVectorizer(
 X_uni = cv_uni.fit_transform(df_company["text_processed"])
 uni_features = cv_uni.get_feature_names_out()
 
-# ---- Bigrams ----
-'''cv_bi = CountVectorizer(
-    ngram_range=(2, 2),
-    min_df=0.04,   # ≥ 4% of companies → strong relevance
-    max_df=0.85,
-    #max_features=2000
-)
 
-X_bi = cv_bi.fit_transform(df_company["text_processed"])
-bi_features = cv_bi.get_feature_names_out()'''
 
-'''cv_tri = CountVectorizer(
-    ngram_range=(3, 3),
-    min_df=0.05,   # ≥ 5% of companies → very strong relevance
-    max_df=0.85,
-    #max_features=1000
-)
-X_tri = cv_tri.fit_transform(df_company["text_processed"])
-tri_features = cv_tri.get_feature_names_out()'''
-
-# ---- Fusion ----
-X_tdm = hstack([X_uni])#, X_bi, X_tri])
-features = np.concatenate([uni_features])#, bi_features, tri_features])
+# ---- Matrix fusion (only unigrams activated here) ----
+X_tdm = hstack([X_uni])
+features = np.concatenate([uni_features])
 
 print("📐 TDM shape :", X_tdm.shape)
 
 # =====================
-# EXPORT TDM CSV
+# EXPORT TDM 
 # =====================
 df_tdm = pd.DataFrame(
     X_tdm.toarray(),
@@ -189,13 +220,12 @@ df_tdm = pd.DataFrame(
 df_tdm.to_csv("data/TDM_unigram_bigram_trigram.csv")
 print("💾 TDM exportée (CSV)")
 
-# =====================
-# TF-IDF COMPUTATION
-# =====================
-tfidf = TfidfVectorizer(
-    vocabulary=features
-)
+# ====================
+# TF-IDF REPRESENTATION
+# ====================
 
+# Global TF-IDF using the previously extracted vocabulary
+tfidf = TfidfVectorizer(vocabulary=features)
 X_tfidf = tfidf.fit_transform(df_company["text_processed"])
 
 df_tfidf = pd.DataFrame(
@@ -204,14 +234,16 @@ df_tfidf = pd.DataFrame(
     columns=features
 )
 
-uni_tfidf = TfidfVectorizer(
-    vocabulary=uni_features)
+# Separate TF-IDF for unigrams only (explicit export)
+uni_tfidf = TfidfVectorizer(vocabulary=uni_features)
 X_uni_tfidf = uni_tfidf.fit_transform(df_company["text_processed"])
+
 df_uni_tfidf = pd.DataFrame(
     X_uni_tfidf.toarray(),
     index=df_company["company"],
     columns=uni_features
 )
+
 df_uni_tfidf.to_csv("data/TFIDF_unigram.csv")
 print("💾 TF-IDF Unigrams exported (CSV)")
 
