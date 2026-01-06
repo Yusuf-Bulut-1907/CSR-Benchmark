@@ -202,7 +202,7 @@ This script assumes that the TF-IDF matrices have already been generated in the 
 ## Link Analysis
 Once the TF-IDF matrices have been created, the link analysis stage constructs a network connecting companies and the key textual concepts extracted from their reports. This network is then analyzed to identify the most central companies and concepts, and to produce a structured summary of network importance.
 
-The process is composed of four sequential steps:
+The process is composed of five sequential steps:
 1. **Graph Construction**  
    The script [`graph_bipartite.py`](./link_analysis/graph_bipartite.py) reads the TF-IDF matrix from `data/TFIDF_unigram_bigram_trigram.csv` and constructs a bipartite network. Each company is connected to the concepts that appear prominently in its textual content. The network edges are weighted according to the TF-IDF values, and the nodes are labeled as either company or concept (further distinguishing unigrams, bigrams, and trigrams). Running this script generates the files `gephi_graph/nodes.csv` and `gephi_graph/edges.csv`, which can also be imported into Gephi for visualization.
 ```bash
@@ -219,11 +219,17 @@ python link_analysis/centrality_metrics.py
 python link_analysis/Analyze_Centrality_results.py
 ```
 4. **Shortest Path**  
-   Finally, [`Shortest_path.py`](./link_analysis/Shortest_path.py) calculates semantic distances between companies based on their shared concepts. It achieves it by building a distance-weighted graph where edge weights are the inverse of the TF-IDF scores. Using the `NetworkX` library, the script loads the previously generated nodes and edges, constructs the corresponding graph structure, and computes pairwise semantic distances between company nodes. The resulting distances provide a quantitative measure of how closely companies are connected within the semantic space defined by shared concepts.
+   Then, [`Shortest_path.py`](./link_analysis/Shortest_path.py) calculates semantic distances between companies based on their shared concepts. It achieves it by building a distance-weighted graph where edge weights are the inverse of the TF-IDF scores. Using the `NetworkX` library, the script loads the previously generated nodes and edges, constructs the corresponding graph structure, and computes pairwise semantic distances between company nodes. The resulting distances provide a quantitative measure of how closely companies are connected within the semantic space defined by shared concepts.
 ```bash
 python link_analysis/Shortest_path.py
 ```
    Executing this script generates the file `results/shortest_paths_companies.csv`, which provides a quantitative view of how closely companies are related in the semantic network built from shared concepts.
+
+5. **Shortest Path Analysis**
+   The script [`shortest_path_analyse.py`](./link_analysis/shortest_path_analyse.py) analyzes the semantic distances computed between companies by identifying the closest pairs of firms in the network, detecting the most isolated companies based on average shortest-path distance, and examining the overall distribution of semantic distances. The analysis is enriched with company metadata to compare intra-sector and inter-sector distances, and to correlate average semantic distance with key network centrality measures (PageRank, betweenness, and closeness), providing an integrated interpretation of semantic proximity and structural importance within the CSR concept network.
+```bash
+python link_analysis/shortest_path_analyse.py
+```
 
 ## Tests and Exploratory Experiments
 In addition to the main analysis pipeline, the project includes a [`test/`](./test/) folder containing several exploratory scripts used to validate methodological choices, test alternative approaches, or conduct preliminary analyses. These scripts are not required to reproduce the core results of the project, but they provide complementary insights and experimental comparisons.
