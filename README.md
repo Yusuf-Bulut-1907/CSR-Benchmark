@@ -129,7 +129,36 @@ Run the following command:
 ```bash
 python text_mining/stats_and_cleaning.py
 ```
-Running this script will generate `corpus_statistics.txt` in the root folder.
+Running this script will generate `corpus_statistics.txt` in the `results/`  folder.
+
+The next step consists in transforming the cleaned textual corpus into numerical representations that can be used for quantitative analysis. This is handled by the script [`text_mining_tf-idf.py`](./text_mining/text_mining_tf-idf.py).
+
+This script applies a linguistic preprocessing pipeline based on `spaCy` to normalize the text through lemmatization and to focus on linguistically meaningful terms. It extracts noun-based unigrams as well as compound expressions (bigrams and trigrams) that are particularly relevant in CSR and ESG discourse. To reduce noise, both generic stopwords and domain-specific stopwords related to corporate, legal, and GDPR vocabulary are removed.
+
+Once the texts are processed, documents are aggregated at the company level so that each company is represented by a single consolidated document. From this aggregated corpus, the script builds a Term-Document Matrix (TDM) and computes TF-IDF representations, which quantify the importance of each term relative to companies.
+
+These representations are exported as CSV files and are intended to serve as inputs for downstream analyses such as clustering, similarity analysis, or topic modeling.
+
+To generate the term-document matrices and TF-IDF representations, run the following command:
+```bash
+python text_mining/text_mining_tf-idf.py
+```
+### Text Analytics & Clustering
+
+This stage performs company-level text analytics and unsupervised learning on the TF-IDF representations generated in the previous step. The pipeline is organized into modular components, each responsible for a specific analytical task. These components are imported and orchestrated by a central execution script [`main_text_analytics.py`](./text_mining_analytics.py/main_text_analytics.py), which ensures reproducibility and clarity of the workflow.
+   
+   - [`company_metadata`](text_mining_analytics.py/company_metadata.py)
+        Provides structured company-level metadata (sector, industry, headquarters country, listing status).
+        The file is auto-generated from a private csv source.
+   - [`loaders.py`](text_mining_analytics.py/loaders.py)
+        Contains utility functions to load TF-IDF matrices and company metadata, and to merge analytical results (e.g. clustering outputs) with descriptive company information for interpretation.
+   - [`processing.py`](./text_mining_analytics.py/processing.py)
+        Implements similarity and term-level analyses, including cosine similarity between companies, term co-occurrence analysis, and identification of globally important terms based on TF-IDF weights.
+   - [`models.py`](./text_mining_analytics.py/models.py)
+        Centralizes unsupervised learning methods, including K-Means clustering, angular clustering, Non-negative Matrix Factorization (NMF) for topic modeling, cluster interpretation via keywords, and internal validation using silhouette scores.
+   - [`visualizers.py`](./text_mining_analytics.py/visualizers.py)
+        Provides visualization tools to support model validation and interpretation, including heatmaps for cluster profiling, elbow curves for cluster selection, and silhouette plots for cluster quality assessment.
+
 
 ## Link Analysis
 
