@@ -147,18 +147,55 @@ python text_mining/text_mining_tf-idf.py
 
 This stage performs company-level text analytics and unsupervised learning on the TF-IDF representations generated in the previous step. The pipeline is organized into modular components, each responsible for a specific analytical task. These components are imported and orchestrated by a central execution script [`main_text_analytics.py`](./text_mining_analytics.py/main_text_analytics.py), which ensures reproducibility and clarity of the workflow.
    
-   - [`company_metadata`](text_mining_analytics.py/company_metadata.py)
+   - [`company_metadata`](./text_mining_analytics.py/company_metadata.py)
         Provides structured company-level metadata (sector, industry, headquarters country, listing status).
         The file is auto-generated from a private csv source.
-   - [`loaders.py`](text_mining_analytics.py/loaders.py)
+        ```bash
+        python text_mining_analytics.py/company_metadata.py
+        ```
+   - [`loaders.py`](./text_mining_analytics.py/loaders.py)
         Contains utility functions to load TF-IDF matrices and company metadata, and to merge analytical results (e.g. clustering outputs) with descriptive company information for interpretation.
+        ```bash
+        python text_mining_analytics.py/loaders.py
+        ```
    - [`processing.py`](./text_mining_analytics.py/processing.py)
         Implements similarity and term-level analyses, including cosine similarity between companies, term co-occurrence analysis, and identification of globally important terms based on TF-IDF weights.
+        ```bash
+        python text_mining_analytics.py/processing.py
+        ```
    - [`models.py`](./text_mining_analytics.py/models.py)
         Centralizes unsupervised learning methods, including K-Means clustering, angular clustering, Non-negative Matrix Factorization (NMF) for topic modeling, cluster interpretation via keywords, and internal validation using silhouette scores.
+        ```bash
+        python text_mining_analytics.py/models.py
+        ```
    - [`visualizers.py`](./text_mining_analytics.py/visualizers.py)
         Provides visualization tools to support model validation and interpretation, including heatmaps for cluster profiling, elbow curves for cluster selection, and silhouette plots for cluster quality assessment.
+        ```bash
+        python text_mining_analytics.py/visualizers.py
+        ```
+**Main execution script**
 
+This script serves as the main entry point of the text analytics and clustering pipeline. It orchestrates the full workflow by integrating all previously defined modules into a single, reproducible analysis process.
+
+Rather than executing each analytical component independently, this script coordinates all the steps to ensure methodological coherence and interpretability of results.
+
+At a high level, the pipeline performs the following operations:
+
+- Loads company-level TF-IDF representations and associated metadata
+- Computes similarity measures between companies based on textual content
+- Extracts latent semantic structures using Non-negative Matrix Factorization (NMF)
+- Applies unsupervised clustering using cosine-based (angular) K-Means
+- Evaluates cluster quality through global and cluster-level silhouette analysis
+- Generates structured outputs, including similarity matrices, validation plots, heatmaps, and a textual cluster report
+
+All analytical results and visual diagnostics are automatically exported to the `results/` directory.
+
+To run the complete text analytics and clustering pipeline, execute:
+
+```bash
+    python text_mining_analytics.py/main_text_analytics.py
+```
+This script assumes that the TF-IDF matrices have already been generated in the `data/` directory during the previous text representation stage.
 
 ## Link Analysis
 
