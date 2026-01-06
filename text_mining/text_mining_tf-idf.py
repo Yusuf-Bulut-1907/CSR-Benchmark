@@ -218,7 +218,7 @@ df_tdm = pd.DataFrame(
 )
 
 df_tdm.to_csv("data/TDM_unigram_bigram_trigram.csv")
-print("💾 TDM exportée (CSV)")
+print("💾 TDM exported (CSV)")
 
 # ====================
 # TF-IDF REPRESENTATION

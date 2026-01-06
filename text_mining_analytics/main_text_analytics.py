@@ -73,7 +73,7 @@ def main_text_analysis():
         n_components=n_topics
     )
 
-    print(f"✅ NMF terminée : Données compressées à {n_topics} thèmes.")
+    print(f"✅ NMF Completed : data compressed into {n_topics} topics.")
     
     # Display top terms per topic
     for t, words in topics.items():

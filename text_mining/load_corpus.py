@@ -22,7 +22,7 @@ import justext
 
 # Absolute path to the directory containing scraped JSON files
 # Each file is expected to correspond to a single company
-JSON_FOLDER_PATH = r"/Users/matteogalizia/Documents/GitHub/CSR-Benchmark/scraped_output" # Specify the path to the folder containing JSON files
+JSON_FOLDER_PATH = r"" # Specify the path to the folder containing JSON files
 
 #==========================
 # LOADING OF THE CORPUS

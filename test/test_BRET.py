@@ -17,7 +17,7 @@ import os
 # ============================================================
 # Ensure that the project root directory is included in sys.path
 # to allow absolute imports across the project structure.
-project_root = "/Users/matteogalizia/Documents/GitHub/CSR-Benchmark"
+project_root = ""
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
