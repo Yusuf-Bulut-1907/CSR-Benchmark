@@ -17,3 +17,4 @@ xlsxwriter
 networkx
 matplotlib
 seaborn
+vaderSentiment
