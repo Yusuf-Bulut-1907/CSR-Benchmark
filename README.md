@@ -193,11 +193,33 @@ All analytical results and visual diagnostics are automatically exported to the 
 To run the complete text analytics and clustering pipeline, execute:
 
 ```bash
-    python text_mining_analytics.py/main_text_analytics.py
+python text_mining_analytics.py/main_text_analytics.py
 ```
 This script assumes that the TF-IDF matrices have already been generated in the `data/` directory during the previous text representation stage.
 
 ## Link Analysis
+Once the TF-IDF matrices have been created, the link analysis stage constructs a network connecting companies and the key textual concepts extracted from their reports. This network is then analyzed to identify the most central companies and concepts, and to produce a structured summary of network importance.
+
+The process is composed of four sequential steps:
+1. **Graph Construction**  
+   The script [`graph_bipartite.py`](./link_analysis/graph_bipartite.py) reads the TF-IDF matrix from `data/TFIDF_unigram_bigram_trigram.csv` and constructs a bipartite network. Each company is connected to the concepts that appear prominently in its textual content. The network edges are weighted according to the TF-IDF values, and the nodes are labeled as either company or concept (further distinguishing unigrams, bigrams, and trigrams). Running this script generates the files `gephi_graph/nodes.csv` and `gephi_graph/edges.csv`, which can also be imported into Gephi for visualization.
+```bash
+python link_analysis/graph_bipartite.py
+```
+2. **Centrality Computation**
+    Next, [`Centrality_metrics.py`](./link_analysis/Centrality_metrics.py) uses the generated nodes and edges to calculate a range of centrality metrics for each node in the network, including degree, weighted degree, betweenness, closeness, and PageRank. Both companies and concepts are analyzed, allowing the identification of highly influential nodes in the network. The computed metrics are exported as `results/centrality_metrics.csv`.
+```bash
+python link_analysis/centrality_metrics.py
+```
+3. **Analysis of Centrality Results**
+    Then, [`Analyze_Centrality_results.py`](./link_analysis/Analyze_Centrality_results.py) reads the centrality metrics and produces a comprehensive Excel report `results/centrality_analysis.xlsx`. This report contains global statistics, averages by node type, ranking of nodes by each metric, and identification of core nodes, defined as nodes exceeding the average on three key metrics (weighted degree, closeness, and PageRank). Separate sheets are provided for concepts and companies, as well as a global overview of the network structure.
+```bash
+python link_analysis/Analyze_Centrality_results.py
+```
+4. **Shortest Path**
+
+
+After completing this pipeline, you will have a detailed, structured overview of the network of CSR/ESG concepts and companies, highlighting the most central and influential elements.
 
 ## Authors
 - **Bastian Minet** – [Bastian-Mnt](https://github.com/Bastian-Mnt)
