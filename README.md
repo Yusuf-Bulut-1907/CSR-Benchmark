@@ -217,9 +217,11 @@ python link_analysis/centrality_metrics.py
 python link_analysis/Analyze_Centrality_results.py
 ```
 4. **Shortest Path**
-
-
-After completing this pipeline, you will have a detailed, structured overview of the network of CSR/ESG concepts and companies, highlighting the most central and influential elements.
+    Finally, [`Shortest_path.py`](./link_analysis/Shortest_path.py) calculates semantic distances between companies based on their shared concepts. It achieves it by building a distance-weighted graph where edge weights are the inverse of the TF-IDF scores. Using the `NetworkX` library, the script loads the previously generated nodes and edges, constructs the corresponding graph structure, and computes pairwise semantic distances between company nodes. The resulting distances provide a quantitative measure of how closely companies are connected within the semantic space defined by shared concepts.
+```bash
+python link_analysis/Shortest_path.py
+```
+Executing this script generates the file `results/shortest_paths_companies.csv`, which provides a quantitative view of how closely companies are related in the semantic network built from shared concepts.
 
 ## Authors
 - **Bastian Minet** – [Bastian-Mnt](https://github.com/Bastian-Mnt)
